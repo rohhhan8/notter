@@ -6,7 +6,8 @@ export async function GET(request: Request) {
   try {
     const oauthUrl = await getGoogleOAuthUrl(callbackUrl);
     return Response.redirect(oauthUrl, 302);
-  } catch {
+  } catch (error) {
+    console.error(error);
     const origin = process.env.WEB_APP_ORIGIN?.split(",")[0]?.trim() ?? "http://localhost:3000";
     return Response.redirect(`${origin}/onboarding/sign-in?error=oauth_failed`, 302);
   }

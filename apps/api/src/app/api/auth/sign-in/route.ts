@@ -1,6 +1,6 @@
 import type { SignInRequest } from "@notter/types";
 import { signIn } from "@/features/auth/service";
-import { errorResponse, toErrorMessage } from "@/lib/api-response";
+import { errorResponse, handleApiError } from "@/lib/api-response";
 
 export async function POST(request: Request) {
   const body = (await request.json()) as SignInRequest;
@@ -13,6 +13,6 @@ export async function POST(request: Request) {
     const result = await signIn(body);
     return Response.json(result, { status: 200 });
   } catch (error) {
-    return errorResponse(toErrorMessage(error), 401);
+    return handleApiError(error, 401);
   }
 }

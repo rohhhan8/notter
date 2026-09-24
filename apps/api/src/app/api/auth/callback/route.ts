@@ -16,7 +16,8 @@ export async function GET(request: Request) {
   try {
     await exchangeCodeForSession(code);
     return Response.redirect(`${origin}/onboarding/welcome-back`, 302);
-  } catch {
+  } catch (error) {
+    console.error(error);
     return Response.redirect(`${origin}/onboarding/sign-in?error=oauth_failed`, 302);
   }
 }
