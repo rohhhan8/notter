@@ -2,9 +2,7 @@
 
 import { createContext, useContext, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
 import { createOnboardingClient } from "@notter/api-client";
-import { Button } from "@/components/ui/button";
 import { getApiBaseUrl } from "@/lib/env";
 import { OnboardingStepper } from "@/features/onboarding/components/onboarding-stepper";
 import { WelcomeScreen } from "@/features/onboarding/components/welcome-screen";
@@ -12,13 +10,7 @@ import { SignUpForm } from "@/features/onboarding/components/sign-up-form";
 import { SignInForm } from "@/features/onboarding/components/sign-in-form";
 import { ProfileForm } from "@/features/onboarding/components/profile-form";
 import { WelcomeBackScreen } from "@/features/onboarding/components/welcome-back-screen";
-import {
-  stepHref,
-  stepperPosition,
-  backStep,
-  getStepFromPathname,
-  type OnboardingStep,
-} from "@/features/onboarding/steps";
+import { stepHref, stepperPosition, getStepFromPathname, type OnboardingStep } from "@/features/onboarding/steps";
 
 const titles: Partial<Record<OnboardingStep, { title: string; subtitle?: string }>> = {
   "sign-up": { title: "Create your account", subtitle: "Takes less than a minute." },
@@ -39,14 +31,19 @@ export function useOnboardingNavigate() {
 /**
  * Mounted once by app/onboarding/layout.tsx — a layout persists across
  * nested route changes in the App Router, so this component instance (and
- * everything inside it: the back button, the stepper, the header) never
- * unmounts as the user moves between onboarding steps. It reads the current
- * step from the URL itself (usePathname), rather than each route's page.tsx
- * passing it down, specifically so the layout doesn't need `children` (whose
- * identity swaps on every navigation) in the persistent part of the tree at
- * all. Route pages under app/onboarding/* exist only so the URL and browser
+ * everything inside it: the stepper, the header) never unmounts as the user
+ * moves between onboarding steps. It reads the current step from the URL
+ * itself (usePathname), rather than each route's page.tsx passing it down,
+ * specifically so the layout doesn't need `children` (whose identity swaps
+ * on every navigation) in the persistent part of the tree at all. Route
+ * pages under app/onboarding/* exist only so the URL and browser
  * back/forward keep working — their own content is unused, StepContent below
  * is a plain switch on the step name.
+ *
+ * There's no in-app back button: the device's own back gesture/button
+ * already navigates correctly since every step is a real route, and a
+ * second back affordance next to the wordmark collided with it on narrow
+ * screens.
  *
  * Route protection (redirecting a signed-in user off welcome/sign-up/sign-in,
  * and a signed-out user off /home) is a client-side check here and in
@@ -88,25 +85,12 @@ export function OnboardingFlow() {
 
   const chrome = titles[step];
   const position = stepperPosition[step];
-  const back = backStep[step];
 
   return (
     <OnboardingNavigationContext.Provider value={goToStep}>
       <div className="flex flex-col gap-6 pb-8 empty:pb-0">
         {chrome ? (
           <>
-            {back ? (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                aria-label="Go back"
-                onClick={() => goToStep(back)}
-                className="-ml-2 size-9 transition-transform duration-100 ease-out active:scale-[0.94]"
-              >
-                <ArrowLeft className="size-4" />
-              </Button>
-            ) : null}
             {position ? <OnboardingStepper current={position} /> : null}
             <div className="flex flex-col gap-2">
               <h1 className="font-heading text-3xl font-semibold tracking-tight text-balance">{chrome.title}</h1>

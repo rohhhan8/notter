@@ -28,10 +28,3 @@ export const stepperPosition: Partial<Record<OnboardingStep, 1 | 2>> = {
 };
 
 export const stepperTotal = Math.max(...Object.values(stepperPosition));
-
-/** Where the back button on each step should go. Steps without an entry have no back button. */
-export const backStep: Partial<Record<OnboardingStep, OnboardingStep>> = {
-  "sign-up": "welcome",
-  "sign-in": "welcome",
-  profile: "sign-up",
-};
