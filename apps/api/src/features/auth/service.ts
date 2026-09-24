@@ -20,6 +20,19 @@ export async function signIn({ email, password }: SignInRequest): Promise<AuthRe
   return { userId: data.user.id, email: data.user.email ?? email };
 }
 
+export async function getGoogleOAuthUrl(redirectTo: string): Promise<string> {
+  const supabase = await getSupabaseForRequest();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo, skipBrowserRedirect: true },
+  });
+
+  if (error) throw error;
+  if (!data.url) throw new Error("Supabase did not return an OAuth URL");
+
+  return data.url;
+}
+
 export async function exchangeCodeForSession(code: string): Promise<AuthResponse> {
   const supabase = await getSupabaseForRequest();
   const { data, error } = await supabase.auth.exchangeCodeForSession(code);

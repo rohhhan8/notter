@@ -13,7 +13,6 @@
     "@hookform/resolvers": "^5.9.1",
     "@notter/api-client": "*",
     "@notter/types": "*",
-    "@supabase/ssr": "^0.12.7",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.4.0",
     "lucide-react": "^1.47.0",

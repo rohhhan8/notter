@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { getApiBaseUrl } from "@/lib/env";
 
 function GoogleLogo() {
@@ -33,15 +32,9 @@ interface GoogleSignInButtonProps {
 export function GoogleSignInButton({ className }: GoogleSignInButtonProps) {
   const [isRedirecting, setIsRedirecting] = useState(false);
 
-  async function handleClick() {
+  function handleClick() {
     setIsRedirecting(true);
-    const supabase = createSupabaseBrowserClient();
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${getApiBaseUrl()}/api/auth/callback` },
-    });
-
-    if (error) setIsRedirecting(false);
+    window.location.href = `${getApiBaseUrl()}/api/auth/google`;
   }
 
   return (
