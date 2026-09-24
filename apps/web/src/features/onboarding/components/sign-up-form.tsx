@@ -63,7 +63,7 @@ export function SignUpForm() {
         </p>
       ) : null}
 
-      <div className="mt-auto flex flex-col gap-3 pb-8">
+      <div className="flex flex-col gap-3">
         <PrimaryButton type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Creating account…" : "Create account"}
         </PrimaryButton>

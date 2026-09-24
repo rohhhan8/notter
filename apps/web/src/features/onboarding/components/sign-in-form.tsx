@@ -63,7 +63,7 @@ export function SignInForm() {
         </p>
       ) : null}
 
-      <div className="mt-auto flex flex-col gap-3 pb-8">
+      <div className="flex flex-col gap-3">
         <PrimaryButton type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Signing in…" : "Sign in"}
         </PrimaryButton>
