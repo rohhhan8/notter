@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { PrimaryButton } from "@/features/onboarding/components/primary-button";
+import { GoogleSignInButton } from "@/features/onboarding/components/google-sign-in-button";
 
 export function WelcomeScreen() {
   return (
@@ -23,6 +24,15 @@ export function WelcomeScreen() {
             Get started
           </PrimaryButton>
         </Link>
+
+        <div className="flex items-center gap-3 py-1" aria-hidden>
+          <div className="h-px flex-1 bg-border" />
+          <span className="text-xs font-medium text-muted-foreground">OR</span>
+          <div className="h-px flex-1 bg-border" />
+        </div>
+
+        <GoogleSignInButton />
+
         <p className="text-center text-sm text-muted-foreground">
           Already have an account?{" "}
           <Link href="/onboarding/sign-in" className="font-medium text-foreground underline-offset-4 hover:underline">
