@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
-import { Geist_Mono, Poppins } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Poppins, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -8,21 +8,31 @@ const poppins = Poppins({
   weight: ["500", "600", "700"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
   subsets: ["latin"],
+  weight: ["800"],
 });
 
 export const metadata: Metadata = {
-  title: "Notter",
+  title: "notter.",
   description: "Capture and organize your notes, wherever the thought happens.",
+  appleWebApp: {
+    capable: true,
+    title: "notter.",
+    statusBarStyle: "black-translucent",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#000000",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${poppins.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${poppins.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

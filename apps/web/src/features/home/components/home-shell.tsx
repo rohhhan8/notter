@@ -7,6 +7,7 @@ import type { Profile } from "@notter/types";
 import { getApiBaseUrl } from "@/lib/env";
 import { Button } from "@/components/ui/button";
 import { LoadingScreen } from "@/components/loading-screen";
+import { Wordmark } from "@/components/wordmark";
 
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -67,12 +68,7 @@ export function HomeShell() {
   return (
     <div className="flex min-h-dvh flex-col bg-background">
       <header className="flex items-center justify-between px-6 py-6 sm:px-10">
-        <div className="flex items-center gap-2">
-          <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <span className="text-sm font-semibold">N</span>
-          </div>
-          <span className="font-heading text-sm font-semibold">Notter</span>
-        </div>
+        <Wordmark className="text-lg" />
         <Button variant="ghost" size="sm" onClick={handleSignOut} disabled={isSigningOut}>
           {isSigningOut ? "Signing out…" : "Sign out"}
         </Button>

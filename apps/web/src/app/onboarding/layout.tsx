@@ -1,9 +1,11 @@
 import { ShowcasePanel } from "@/features/onboarding/components/showcase-panel";
 import { OnboardingFlow } from "@/features/onboarding/components/onboarding-flow";
+import { Wordmark } from "@/components/wordmark";
 
 export default function OnboardingLayout({ children }: LayoutProps<"/onboarding">) {
   return (
-    <div className="flex min-h-dvh flex-col bg-background lg:flex-row">
+    <div className="relative flex min-h-dvh flex-col bg-background lg:flex-row">
+      <Wordmark className="absolute left-6 top-[max(env(safe-area-inset-top),24px)] z-10 text-lg sm:left-8" />
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-6 pb-[max(env(safe-area-inset-bottom),24px)] pt-[max(env(safe-area-inset-top),24px)] sm:max-w-lg sm:px-8 lg:mx-0 lg:max-w-none lg:basis-1/2 lg:justify-center lg:px-16 lg:py-12 xl:px-24">
         <div className="flex w-full max-w-md flex-1 flex-col lg:flex-none">
           {/* Each route's page.tsx renders nothing visible — OnboardingFlow
