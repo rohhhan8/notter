@@ -6,6 +6,7 @@ import { createOnboardingClient, createProfileClient } from "@notter/api-client"
 import type { Profile } from "@notter/types";
 import { getApiBaseUrl } from "@/lib/env";
 import { Button } from "@/components/ui/button";
+import { LoadingScreen } from "@/components/loading-screen";
 
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -23,9 +24,26 @@ export function HomeShell() {
     let cancelled = false;
 
     async function loadProfile() {
-      const client = createProfileClient({ baseUrl: getApiBaseUrl() });
-      const result = await client.getCurrent();
-      if (!cancelled) setProfile(result);
+      const onboardingClient = createOnboardingClient({ baseUrl: getApiBaseUrl() });
+      const session = await onboardingClient.getSession();
+
+      if (cancelled) return;
+
+      if (!session) {
+        router.replace("/onboarding");
+        return;
+      }
+
+      const profileClient = createProfileClient({ baseUrl: getApiBaseUrl() });
+      const result = await profileClient.getCurrent();
+      if (cancelled) return;
+
+      if (!result) {
+        router.replace("/onboarding/profile");
+        return;
+      }
+
+      setProfile(result);
     }
 
     loadProfile();
@@ -33,13 +51,17 @@ export function HomeShell() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [router]);
 
   async function handleSignOut() {
     setIsSigningOut(true);
     const client = createOnboardingClient({ baseUrl: getApiBaseUrl() });
     await client.signOut();
     router.push("/onboarding");
+  }
+
+  if (!profile) {
+    return <LoadingScreen />;
   }
 
   return (
@@ -59,7 +81,7 @@ export function HomeShell() {
       <main className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
         <p className="text-sm font-medium text-muted-foreground">{getGreeting()}</p>
         <h1 className="font-heading text-4xl leading-[1.15] font-semibold tracking-tight text-balance sm:text-5xl">
-          {profile === undefined ? "Loading…" : profile ? profile.fullName.split(" ")[0] : "Welcome"}
+          {profile.fullName.split(" ")[0]}
         </h1>
         <p className="max-w-[32ch] text-base text-muted-foreground text-pretty">
           The Notter workspace lands here next.

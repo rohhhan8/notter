@@ -1,9 +1,11 @@
 "use client";
 
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { createOnboardingClient } from "@notter/api-client";
 import { Button } from "@/components/ui/button";
+import { getApiBaseUrl } from "@/lib/env";
 import { OnboardingStepper } from "@/features/onboarding/components/onboarding-stepper";
 import { WelcomeScreen } from "@/features/onboarding/components/welcome-screen";
 import { SignUpForm } from "@/features/onboarding/components/sign-up-form";
@@ -24,6 +26,9 @@ const titles: Partial<Record<OnboardingStep, { title: string; subtitle?: string 
   profile: { title: "Set up your profile", subtitle: "This helps us tailor Notter to you." },
 };
 
+/** Steps a signed-in user shouldn't be able to sit on — profile/welcome-back are still valid mid-onboarding. */
+const signedOutOnlySteps: OnboardingStep[] = ["welcome", "sign-up", "sign-in"];
+
 /** Navigate to another onboarding step by name. See OnboardingFlow for why this is a plain router.push. */
 export const OnboardingNavigationContext = createContext<(step: OnboardingStep) => void>(() => {});
 
@@ -39,14 +44,43 @@ export function useOnboardingNavigate() {
  * step from the URL itself (usePathname), rather than each route's page.tsx
  * passing it down, specifically so the layout doesn't need `children` (whose
  * identity swaps on every navigation) in the persistent part of the tree at
- * all. Route pages under app/onboarding/* exist only so the URL, browser
- * back/forward, and proxy.ts route protection keep working — their own
- * content is unused, StepContent below is a plain switch on the step name.
+ * all. Route pages under app/onboarding/* exist only so the URL and browser
+ * back/forward keep working — their own content is unused, StepContent below
+ * is a plain switch on the step name.
+ *
+ * Route protection (redirecting a signed-in user off welcome/sign-up/sign-in,
+ * and a signed-out user off /home) is a client-side check here and in
+ * HomeShell, not a server-side proxy: apps/api owns the Supabase session
+ * cookie on its own origin, so apps/web's server can never see it on an
+ * incoming request — a proxy here checking "is this request authenticated"
+ * would always see a signed-out user, which is why the previous proxy-based
+ * version of this bounced a freshly-signed-in user straight back to
+ * /onboarding.
  */
 export function OnboardingFlow() {
   const pathname = usePathname();
   const router = useRouter();
   const step = getStepFromPathname(pathname);
+
+  useEffect(() => {
+    if (!signedOutOnlySteps.includes(step)) return;
+
+    let cancelled = false;
+
+    async function checkSession() {
+      const client = createOnboardingClient({ baseUrl: getApiBaseUrl() });
+      const session = await client.getSession();
+      if (!cancelled && session) {
+        router.replace("/home");
+      }
+    }
+
+    checkSession();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [step, router]);
 
   function goToStep(target: OnboardingStep) {
     router.push(stepHref[target]);

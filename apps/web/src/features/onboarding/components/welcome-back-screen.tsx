@@ -42,7 +42,7 @@ export function WelcomeBackScreen() {
 
   useEffect(() => {
     if (status.kind !== "resolved") return;
-    const timeout = window.setTimeout(() => router.push("/"), CONTINUE_AFTER_MS);
+    const timeout = window.setTimeout(() => router.push("/home"), CONTINUE_AFTER_MS);
     return () => window.clearTimeout(timeout);
   }, [status, router]);
 

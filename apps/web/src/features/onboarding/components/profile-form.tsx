@@ -27,7 +27,7 @@ export function ProfileForm() {
     try {
       const client = createProfileClient({ baseUrl: getApiBaseUrl() });
       await client.create(values);
-      router.push("/");
+      router.push("/home");
     } catch (error) {
       if (error instanceof ApiError && typeof error.body === "object" && error.body && "error" in error.body) {
         setFormError(String((error.body as { error: unknown }).error));
