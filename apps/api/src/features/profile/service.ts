@@ -3,6 +3,7 @@ import { getSupabaseForRequest } from "@/lib/supabase";
 
 interface ProfileRow {
   id: string;
+  email: string;
   full_name: string;
   username: string;
   intent: string;
@@ -11,6 +12,7 @@ interface ProfileRow {
 function toProfile(row: ProfileRow): Profile {
   return {
     id: row.id,
+    email: row.email,
     fullName: row.full_name,
     username: row.username,
     intent: row.intent as Profile["intent"],
