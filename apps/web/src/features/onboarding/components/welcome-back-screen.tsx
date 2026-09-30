@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createProfileClient, authStorage } from "@notter/api-client";
+import { createProfileClient, createOnboardingClient, authStorage } from "@notter/api-client";
 import { getApiBaseUrl } from "@/lib/env";
 import { useOnboardingNavigate } from "@/features/onboarding/components/onboarding-flow";
 
@@ -37,6 +37,16 @@ export function WelcomeBackScreen() {
     }
 
     async function loadProfile() {
+      const onboardingClient = createOnboardingClient({ baseUrl: getApiBaseUrl() });
+      const session = await onboardingClient.getSession();
+
+      if (cancelled) return;
+
+      if (!session) {
+        router.replace("/onboarding/sign-in");
+        return;
+      }
+
       const client = createProfileClient({ baseUrl: getApiBaseUrl() });
       const profile = await client.getCurrent();
 

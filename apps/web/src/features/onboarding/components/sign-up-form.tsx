@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,12 +16,19 @@ export function SignUpForm() {
   const navigate = useOnboardingNavigate();
   const client = useOnboardingClient();
   const [formError, setFormError] = useState<string | null>(null);
+  const emailInputRef = useRef<HTMLInputElement | null>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<SignUpFormValues>({ resolver: zodResolver(signUpSchema) });
+
+  const { ref: formEmailRef, ...emailRegisterProps } = register("email");
+
+  useEffect(() => {
+    emailInputRef.current?.focus();
+  }, []);
 
   async function onSubmit(values: SignUpFormValues) {
     setFormError(null);
@@ -46,7 +53,11 @@ export function SignUpForm() {
           type="email"
           autoComplete="email"
           error={errors.email?.message}
-          {...register("email")}
+          {...emailRegisterProps}
+          ref={(node) => {
+            formEmailRef(node);
+            emailInputRef.current = node;
+          }}
         />
         <FormField
           id="password"

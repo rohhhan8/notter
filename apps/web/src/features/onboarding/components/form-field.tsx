@@ -6,13 +6,15 @@ import { cn } from "@/lib/utils";
 interface FormFieldProps extends ComponentProps<typeof Input> {
   label: string;
   error?: string;
+  ref?: React.Ref<HTMLInputElement>;
 }
 
-export function FormField({ label, error, id, className, ...inputProps }: FormFieldProps) {
+export function FormField({ label, error, id, className, ref, ...inputProps }: FormFieldProps) {
   return (
     <div className="flex flex-col gap-2">
       <Label htmlFor={id}>{label}</Label>
       <Input
+        ref={ref}
         id={id}
         aria-invalid={Boolean(error)}
         className={cn("h-11 px-3 text-base", className)}

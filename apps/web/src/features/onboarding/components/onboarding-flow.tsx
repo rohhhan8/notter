@@ -1,8 +1,8 @@
 "use client";
 
-import { createContext, useContext, useEffect } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { createOnboardingClient } from "@notter/api-client";
+import { createOnboardingClient, createProfileClient } from "@notter/api-client";
 import { getApiBaseUrl } from "@/lib/env";
 import { OnboardingStepper } from "@/features/onboarding/components/onboarding-stepper";
 import { WelcomeScreen } from "@/features/onboarding/components/welcome-screen";
@@ -18,61 +18,63 @@ const titles: Partial<Record<OnboardingStep, { title: string; subtitle?: string 
   profile: { title: "Set up your profile", subtitle: "This helps us tailor Notter to you." },
 };
 
-/** Steps a signed-in user shouldn't be able to sit on — profile/welcome-back are still valid mid-onboarding. */
+/** Steps a signed-in user shouldn't sit on if already fully set up. */
 const signedOutOnlySteps: OnboardingStep[] = ["welcome", "sign-up", "sign-in"];
 
-/** Navigate to another onboarding step by name. See OnboardingFlow for why this is a plain router.push. */
+/** Navigate to another onboarding step by name. */
 export const OnboardingNavigationContext = createContext<(step: OnboardingStep) => void>(() => {});
 
 export function useOnboardingNavigate() {
   return useContext(OnboardingNavigationContext);
 }
 
-/**
- * Mounted once by app/onboarding/layout.tsx — a layout persists across
- * nested route changes in the App Router, so this component instance (and
- * everything inside it: the stepper, the header) never unmounts as the user
- * moves between onboarding steps. It reads the current step from the URL
- * itself (usePathname), rather than each route's page.tsx passing it down,
- * specifically so the layout doesn't need `children` (whose identity swaps
- * on every navigation) in the persistent part of the tree at all. Route
- * pages under app/onboarding/* exist only so the URL and browser
- * back/forward keep working — their own content is unused, StepContent below
- * is a plain switch on the step name.
- *
- * There's no in-app back button: the device's own back gesture/button
- * already navigates correctly since every step is a real route, and a
- * second back affordance next to the wordmark collided with it on narrow
- * screens.
- *
- * Route protection (redirecting a signed-in user off welcome/sign-up/sign-in,
- * and a signed-out user off /home) is a client-side check here and in
- * HomeShell, not a server-side proxy: apps/api owns the Supabase session
- * cookie on its own origin, so apps/web's server can never see it on an
- * incoming request — a proxy here checking "is this request authenticated"
- * would always see a signed-out user, which is why the previous proxy-based
- * version of this bounced a freshly-signed-in user straight back to
- * /onboarding.
- */
 export function OnboardingFlow() {
   const pathname = usePathname();
   const router = useRouter();
   const step = getStepFromPathname(pathname);
+  const [isProfileAuthorized, setIsProfileAuthorized] = useState<boolean>(false);
 
   useEffect(() => {
-    if (!signedOutOnlySteps.includes(step)) return;
-
     let cancelled = false;
 
-    async function checkSession() {
-      const client = createOnboardingClient({ baseUrl: getApiBaseUrl() });
-      const session = await client.getSession();
-      if (!cancelled && session) {
-        router.replace("/home");
+    async function checkAccess() {
+      const onboardingClient = createOnboardingClient({ baseUrl: getApiBaseUrl() });
+      const session = await onboardingClient.getSession();
+
+      if (cancelled) return;
+
+      if (step === "profile") {
+        if (!session) {
+          // Unauthenticated user trying to access profile setup -> redirect to sign-up
+          router.replace("/onboarding/sign-up");
+          return;
+        }
+
+        // Authenticated user: check if profile already exists
+        const profileClient = createProfileClient({ baseUrl: getApiBaseUrl() });
+        const profile = await profileClient.getCurrent();
+        if (cancelled) return;
+
+        if (profile) {
+          // Already completed profile -> send to home
+          router.replace("/home");
+          return;
+        }
+
+        // Authenticated and needs profile setup
+        setIsProfileAuthorized(true);
+      } else if (signedOutOnlySteps.includes(step)) {
+        if (session) {
+          const profileClient = createProfileClient({ baseUrl: getApiBaseUrl() });
+          const profile = await profileClient.getCurrent();
+          if (cancelled) return;
+
+          router.replace(profile ? "/home" : "/onboarding/profile");
+        }
       }
     }
 
-    checkSession();
+    checkAccess();
 
     return () => {
       cancelled = true;
@@ -85,11 +87,12 @@ export function OnboardingFlow() {
 
   const chrome = titles[step];
   const position = stepperPosition[step];
+  const showChrome = step !== "profile" || isProfileAuthorized;
 
   return (
     <OnboardingNavigationContext.Provider value={goToStep}>
       <div className="flex flex-col gap-6 pb-8 empty:pb-0">
-        {chrome ? (
+        {chrome && showChrome ? (
           <>
             {position ? <OnboardingStepper current={position} /> : null}
             <div className="flex flex-col gap-2">
@@ -102,12 +105,20 @@ export function OnboardingFlow() {
         ) : null}
       </div>
 
-      <StepContent step={step} />
+      <StepContent step={step} isProfileAuthorized={isProfileAuthorized} />
     </OnboardingNavigationContext.Provider>
   );
 }
 
-function StepContent({ step }: { step: OnboardingStep }) {
+function StepContent({ step, isProfileAuthorized }: { step: OnboardingStep; isProfileAuthorized: boolean }) {
+  if (step === "profile" && !isProfileAuthorized) {
+    return (
+      <div className="flex flex-1 items-center justify-center py-16">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-foreground border-t-transparent" />
+      </div>
+    );
+  }
+
   return (
     <div key={step} className="flex flex-1 flex-col animate-in fade-in duration-200 ease-out">
       {step === "welcome" && <WelcomeScreen />}
