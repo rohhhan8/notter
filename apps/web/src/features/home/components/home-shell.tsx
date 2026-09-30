@@ -2,22 +2,23 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Settings } from "lucide-react";
 import { createOnboardingClient, createProfileClient } from "@notter/api-client";
 import type { Profile } from "@notter/types";
 import { getApiBaseUrl } from "@/lib/env";
-import { Button } from "@/components/ui/button";
 import { LoadingScreen } from "@/components/loading-screen";
 import { NotesSidebar } from "@/features/home/components/notes-sidebar";
 import { NoteView } from "@/features/home/components/note-view";
 import { PromptComposer } from "@/features/home/components/prompt-composer";
 import { mockNotes, type Note } from "@/features/home/data/mock-notes";
+import { ProfileModal } from "@/features/profile/components/profile-modal";
 
 const GENERATE_DELAY_MS = 900;
 
 export function HomeShell() {
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null | undefined>(undefined);
-  const [isSigningOut, setIsSigningOut] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [notes, setNotes] = useState<Note[]>(mockNotes);
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -57,7 +58,6 @@ export function HomeShell() {
   }, [router]);
 
   async function handleSignOut() {
-    setIsSigningOut(true);
     const client = createOnboardingClient({ baseUrl: getApiBaseUrl() });
     await client.signOut();
     router.push("/onboarding");
@@ -99,13 +99,30 @@ export function HomeShell() {
         onNewNote={handleNewNote}
         isOpen={isSidebarOpen}
         onToggle={() => setIsSidebarOpen((open) => !open)}
+        profile={profile}
+        onOpenProfile={() => setIsProfileModalOpen(true)}
       />
 
       <div className="relative flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-end px-6 pt-[max(env(safe-area-inset-top),24px)] pb-4">
-          <Button variant="ghost" size="sm" onClick={handleSignOut} disabled={isSigningOut}>
-            {isSigningOut ? "Signing out…" : "Sign out"}
-          </Button>
+          <button
+            type="button"
+            onClick={() => setIsProfileModalOpen(true)}
+            aria-label="Profile and Settings"
+            className="flex items-center gap-2.5 rounded-full border border-border bg-card/60 py-1.5 pl-2 pr-3 text-xs font-medium text-foreground transition-colors hover:bg-muted cursor-pointer"
+          >
+            <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-[10px] border border-primary/20">
+              {profile.fullName
+                .split(" ")
+                .map((n) => n[0])
+                .filter(Boolean)
+                .slice(0, 2)
+                .join("")
+                .toUpperCase()}
+            </div>
+            <span className="hidden sm:inline font-medium">{profile.fullName.split(" ")[0]}</span>
+            <Settings className="size-3.5 text-muted-foreground" />
+          </button>
         </header>
 
         {activeNote ? (
@@ -131,6 +148,14 @@ export function HomeShell() {
           </main>
         )}
       </div>
+
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        profile={profile}
+        onProfileUpdate={(updated) => setProfile(updated)}
+        onSignOut={handleSignOut}
+      />
     </div>
   );
 }

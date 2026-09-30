@@ -1,4 +1,4 @@
-import type { CreateProfileRequest, Profile } from "@notter/types";
+import type { CreateProfileRequest, UpdateProfileRequest, Profile } from "@notter/types";
 import { getSupabaseForRequest } from "@/lib/supabase";
 
 interface ProfileRow {
@@ -35,6 +35,43 @@ export async function createProfile(payload: CreateProfileRequest): Promise<Prof
       username: payload.username,
       intent: payload.intent,
     })
+    .select()
+    .single();
+
+  if (error) throw error;
+
+  return toProfile(data as ProfileRow);
+}
+
+export async function updateProfile(payload: UpdateProfileRequest): Promise<Profile> {
+  const supabase = await getSupabaseForRequest();
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+
+  if (userError || !userData.user) {
+    throw new Error("Not authenticated");
+  }
+
+  // Only allow updating full_name and intent. Username cannot be changed.
+  const updates: { full_name?: string; intent?: string } = {};
+  if (payload.fullName !== undefined) {
+    const trimmed = payload.fullName.trim();
+    if (!trimmed) throw new Error("Full name cannot be empty");
+    updates.full_name = trimmed;
+  }
+  if (payload.intent !== undefined) {
+    updates.intent = payload.intent;
+  }
+
+  if (Object.keys(updates).length === 0) {
+    const current = await getCurrentProfile();
+    if (!current) throw new Error("Profile not found");
+    return current;
+  }
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .update(updates)
+    .eq("id", userData.user.id)
     .select()
     .single();
 

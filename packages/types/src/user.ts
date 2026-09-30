@@ -13,3 +13,8 @@ export interface CreateProfileRequest {
   username: string;
   intent: ProfileIntent;
 }
+
+export interface UpdateProfileRequest {
+  fullName?: string;
+  intent?: ProfileIntent;
+}

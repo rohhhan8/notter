@@ -1,10 +1,11 @@
 "use client";
 
-import { Menu, PanelLeft } from "lucide-react";
+import { Menu, PanelLeft, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Wordmark } from "@/components/wordmark";
 import { Tooltip } from "@/components/ui/tooltip";
 import type { Note } from "@/features/home/data/mock-notes";
+import type { Profile } from "@notter/types";
 
 interface NotesSidebarProps {
   notes: Note[];
@@ -13,9 +14,20 @@ interface NotesSidebarProps {
   onNewNote: () => void;
   isOpen: boolean;
   onToggle: () => void;
+  profile?: Profile | null;
+  onOpenProfile?: () => void;
 }
 
-export function NotesSidebar({ notes, activeNoteId, onSelectNote, onNewNote, isOpen, onToggle }: NotesSidebarProps) {
+export function NotesSidebar({
+  notes,
+  activeNoteId,
+  onSelectNote,
+  onNewNote,
+  isOpen,
+  onToggle,
+  profile,
+  onOpenProfile,
+}: NotesSidebarProps) {
   function handleSelectNote(id: string) {
     onSelectNote(id);
     if (window.innerWidth < 768) onToggle();
@@ -73,6 +85,31 @@ export function NotesSidebar({ notes, activeNoteId, onSelectNote, onNewNote, isO
             ))}
           </ul>
         </nav>
+
+        {profile && onOpenProfile ? (
+          <div className="border-t border-sidebar-border p-3">
+            <button
+              type="button"
+              onClick={onOpenProfile}
+              className="flex w-full items-center gap-3 rounded-xl p-2 text-left transition-colors hover:bg-sidebar-accent group cursor-pointer"
+            >
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold text-xs border border-primary/20">
+                {profile.fullName
+                  .split(" ")
+                  .map((n) => n[0])
+                  .filter(Boolean)
+                  .slice(0, 2)
+                  .join("")
+                  .toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="truncate text-xs font-semibold text-sidebar-foreground">{profile.fullName}</p>
+                <p className="truncate text-[11px] text-muted-foreground font-mono">@{profile.username}</p>
+              </div>
+              <Settings className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:rotate-45" />
+            </button>
+          </div>
+        ) : null}
       </aside>
 
       {!isOpen ? (
