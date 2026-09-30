@@ -64,39 +64,44 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {children}
       <div
         aria-live="polite"
-        className="fixed bottom-5 right-5 z-[9999] flex flex-col gap-2.5 max-w-sm pointer-events-none w-full sm:w-auto"
+        className="fixed bottom-4 inset-x-4 sm:inset-x-auto sm:right-6 sm:bottom-6 z-[9999] flex flex-col items-center sm:items-end gap-2 pointer-events-none sm:max-w-sm"
       >
         {toasts.map((item) => (
           <div
             key={item.id}
             role="status"
             className={cn(
-              "pointer-events-auto flex items-start gap-3 rounded-xl border border-border bg-card p-4 text-card-foreground shadow-lg backdrop-blur-md transition-all duration-200 animate-in fade-in slide-in-from-bottom-3",
-              item.type === "success" && "border-emerald-500/20 dark:border-emerald-500/30",
-              item.type === "error" && "border-destructive/20 dark:border-destructive/30",
+              "pointer-events-auto flex w-full sm:w-auto items-center gap-2.5 rounded-xl border border-border bg-card/95 px-3.5 py-2.5 text-card-foreground shadow-lg backdrop-blur-md transition-all duration-200 animate-in fade-in slide-in-from-bottom-2",
+              item.type === "success" && "border-emerald-500/25 bg-card/95",
+              item.type === "error" && "border-destructive/30 bg-card/95",
+              item.type === "info" && "border-border bg-card/95",
             )}
           >
             {item.type === "success" && (
-              <CheckCircle2 className="size-5 shrink-0 text-emerald-500 mt-0.5" />
+              <CheckCircle2 className="size-4 shrink-0 text-emerald-500" />
             )}
             {item.type === "error" && (
-              <AlertCircle className="size-5 shrink-0 text-destructive mt-0.5" />
+              <AlertCircle className="size-4 shrink-0 text-destructive" />
             )}
             {item.type === "info" && (
-              <Info className="size-5 shrink-0 text-foreground/70 mt-0.5" />
+              <Info className="size-4 shrink-0 text-muted-foreground" />
             )}
 
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground">{item.title}</p>
+              <p className="text-xs sm:text-sm font-medium text-foreground truncate sm:whitespace-normal">
+                {item.title}
+              </p>
               {item.description ? (
-                <p className="mt-0.5 text-xs text-muted-foreground">{item.description}</p>
+                <p className="mt-0.5 text-[11px] sm:text-xs text-muted-foreground line-clamp-2">
+                  {item.description}
+                </p>
               ) : null}
             </div>
 
             <button
               type="button"
               onClick={() => removeToast(item.id)}
-              className="size-5 shrink-0 rounded-md p-0.5 text-muted-foreground transition-colors hover:text-foreground hover:bg-muted"
+              className="size-5 shrink-0 flex items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-foreground hover:bg-muted cursor-pointer"
               aria-label="Dismiss toast"
             >
               <X className="size-3.5" />
