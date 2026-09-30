@@ -19,7 +19,6 @@ import {
 import type { Profile, ProfileIntent } from "@notter/types";
 import { createProfileClient } from "@notter/api-client";
 import { getApiBaseUrl } from "@/lib/env";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/toast";
@@ -209,227 +208,229 @@ function ProfileModalContent({
           <button
             type="button"
             onClick={onClose}
-            className="flex items-center gap-2 text-sm font-medium text-foreground"
+            className="flex items-center gap-2 text-sm font-medium text-foreground cursor-pointer"
           >
             <ArrowLeft className="size-4" />
             <span>Back</span>
           </button>
           <span className="text-sm font-semibold">Settings</span>
-          <Button
-            size="sm"
-            onClick={handleSave}
-            disabled={!isDirty || isSaving}
-            className="h-8 px-3 text-xs"
-          >
-            {isSaving ? <Loader2 className="size-3 animate-spin" /> : "Save"}
-          </Button>
+          <div className="w-12" />
         </header>
 
         {/* Content Panel / Right Column */}
-        <main className="flex flex-1 flex-col overflow-y-auto p-5 md:p-6">
-          <div className="flex items-center justify-between pb-4 border-b border-border">
-            <div>
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <main className="flex-1 overflow-y-auto p-5 md:p-6">
+            <div className="pb-4 border-b border-border">
               <h2 id="profile-modal-title" className="text-lg font-semibold text-foreground">
                 {activeTab === "profile" && "Profile & Account"}
                 {activeTab === "general" && "General Settings"}
                 {activeTab === "security" && "Security & Sessions"}
               </h2>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground mt-0.5">
                 {activeTab === "profile" && "Manage your identity, use of purpose, and account session."}
                 {activeTab === "general" && "Manage preferences and default behaviors for Notter."}
                 {activeTab === "security" && "Review session authentication and security parameters."}
               </p>
             </div>
-            {/* Desktop Save Button */}
-            <div className="hidden md:block">
-              <Button
-                size="sm"
-                onClick={handleSave}
-                disabled={!isDirty || isSaving}
-                className="h-8 gap-1.5 px-4 text-xs font-medium"
-              >
-                {isSaving ? <Loader2 className="size-3 animate-spin" /> : <Check className="size-3" />}
-                {isSaving ? "Saving…" : "Save changes"}
-              </Button>
-            </div>
-          </div>
 
-          {activeTab === "profile" ? (
-            <div className="flex flex-col gap-6 pt-5">
-              {/* Profile Card Header */}
-              <div className="flex items-center gap-4 rounded-xl border border-border bg-card/40 p-4">
-                <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold text-base border border-primary/20">
-                  {initials}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="truncate text-sm font-semibold text-foreground">{profile.fullName}</p>
-                  <p className="truncate text-xs text-muted-foreground">{profile.email}</p>
-                </div>
-                <span className="rounded-md bg-muted px-2 py-1 text-[11px] font-mono text-muted-foreground">
-                  @{profile.username}
-                </span>
-              </div>
-
-              {/* Editable Name */}
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="settings-full-name" className="text-xs font-medium">
-                  Full name
-                </Label>
-                <Input
-                  id="settings-full-name"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Your full name"
-                  className="h-10 text-sm"
-                />
-              </div>
-
-              {/* Read-Only Username */}
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="settings-username" className="text-xs font-medium text-muted-foreground">
-                    Username
-                  </Label>
-                  <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                    <Lock className="size-3" />
-                    Cannot be changed
+            {activeTab === "profile" ? (
+              <div className="flex flex-col gap-6 pt-5">
+                {/* Profile Card Header */}
+                <div className="flex items-center gap-4 rounded-xl border border-border bg-card/40 p-4">
+                  <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold text-base border border-primary/20">
+                    {initials}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="truncate text-sm font-semibold text-foreground">{profile.fullName}</p>
+                    <p className="truncate text-xs text-muted-foreground">{profile.email}</p>
+                  </div>
+                  <span className="rounded-md bg-muted px-2 py-1 text-[11px] font-mono text-muted-foreground">
+                    @{profile.username}
                   </span>
                 </div>
-                <div className="relative">
-                  <span className="absolute left-3 top-2.5 text-xs text-muted-foreground select-none">@</span>
+
+                {/* Editable Name */}
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="settings-full-name" className="text-xs font-medium">
+                    Full name
+                  </Label>
                   <Input
-                    id="settings-username"
-                    value={profile.username}
-                    disabled
-                    readOnly
-                    className="h-10 pl-7 text-sm bg-muted/40 cursor-not-allowed opacity-80"
+                    id="settings-full-name"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Your full name"
+                    className="h-10 text-sm"
                   />
                 </div>
-              </div>
 
-              {/* Read-Only Email */}
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="settings-email" className="text-xs font-medium text-muted-foreground">
-                  Email address
-                </Label>
-                <Input
-                  id="settings-email"
-                  value={profile.email}
-                  disabled
-                  readOnly
-                  className="h-10 text-sm bg-muted/40 cursor-not-allowed opacity-80"
-                />
-              </div>
-
-              {/* Purpose of Use / Intent */}
-              <div className="flex flex-col gap-2.5">
-                <Label className="text-xs font-medium">Purpose of use</Label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                  {intentOptions.map((opt) => {
-                    const isSelected = intent === opt.value;
-                    const Icon = opt.icon;
-                    return (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        onClick={() => setIntent(opt.value)}
-                        className={cn(
-                          "flex flex-col items-start gap-1 rounded-xl border p-3 text-left transition-all",
-                          isSelected
-                            ? "border-primary bg-primary/5 ring-1 ring-primary/20"
-                            : "border-border bg-card/30 hover:bg-muted/50"
-                        )}
-                      >
-                        <div className="flex w-full items-center justify-between">
-                          <Icon className={cn("size-4", isSelected ? "text-primary" : "text-muted-foreground")} />
-                          {isSelected ? <Check className="size-3 text-primary" /> : null}
-                        </div>
-                        <span className="text-xs font-semibold mt-1">{opt.label}</span>
-                        <span className="text-[11px] text-muted-foreground leading-snug">{opt.desc}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Account Action: Log Out */}
-              <div className="mt-2 pt-6 pb-6 border-t border-border flex flex-col gap-3">
-                {!showLogoutConfirm ? (
+                {/* Read-Only Username */}
+                <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-foreground">Log out</p>
-                      <p className="text-xs text-muted-foreground">Log out of your account on this device</p>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => setShowLogoutConfirm(true)}
-                      className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-red-600 px-3.5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-red-700 active:bg-red-800 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 dark:bg-red-600 dark:hover:bg-red-500"
-                    >
-                      <LogOut className="size-3.5 text-white" />
-                      <span>Log out</span>
-                    </button>
+                    <Label htmlFor="settings-username" className="text-xs font-medium text-muted-foreground">
+                      Username
+                    </Label>
+                    <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                      <Lock className="size-3" />
+                      Cannot be changed
+                    </span>
                   </div>
-                ) : (
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-red-500/20 bg-red-500/5 p-4 animate-in fade-in duration-150">
-                    <p className="text-xs font-medium text-foreground">
-                      Are you sure you want to log out?
-                    </p>
-                    <div className="flex items-center gap-2 self-end sm:self-auto">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        disabled={isLoggingOut}
-                        onClick={() => setShowLogoutConfirm(false)}
-                        className="h-8 text-xs text-muted-foreground hover:text-foreground"
-                      >
-                        Cancel
-                      </Button>
+                  <div className="relative">
+                    <span className="absolute left-3 top-2.5 text-xs text-muted-foreground select-none">@</span>
+                    <Input
+                      id="settings-username"
+                      value={profile.username}
+                      disabled
+                      readOnly
+                      className="h-10 pl-7 text-sm bg-muted/40 cursor-not-allowed opacity-80"
+                    />
+                  </div>
+                </div>
+
+                {/* Read-Only Email */}
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="settings-email" className="text-xs font-medium text-muted-foreground">
+                    Email address
+                  </Label>
+                  <Input
+                    id="settings-email"
+                    value={profile.email}
+                    disabled
+                    readOnly
+                    className="h-10 text-sm bg-muted/40 cursor-not-allowed opacity-80"
+                  />
+                </div>
+
+                {/* Purpose of Use / Intent */}
+                <div className="flex flex-col gap-2.5">
+                  <Label className="text-xs font-medium">Purpose of use</Label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    {intentOptions.map((opt) => {
+                      const isSelected = intent === opt.value;
+                      const Icon = opt.icon;
+                      return (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => setIntent(opt.value)}
+                          className={cn(
+                            "flex flex-col items-start gap-1 rounded-xl border p-3 text-left transition-all cursor-pointer",
+                            isSelected
+                              ? "border-primary bg-primary/5 ring-1 ring-primary/20"
+                              : "border-border bg-card/30 hover:bg-muted/50"
+                          )}
+                        >
+                          <div className="flex w-full items-center justify-between">
+                            <Icon className={cn("size-4", isSelected ? "text-primary" : "text-muted-foreground")} />
+                            {isSelected ? <Check className="size-3 text-primary" /> : null}
+                          </div>
+                          <span className="text-xs font-semibold mt-1">{opt.label}</span>
+                          <span className="text-[11px] text-muted-foreground leading-snug">{opt.desc}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Account Action: Log Out */}
+                <div className="mt-2 pt-5 pb-2 border-t border-border flex flex-col gap-3">
+                  {!showLogoutConfirm ? (
+                    <div className="flex items-center justify-between py-1">
+                      <span className="text-sm font-medium text-foreground">Log out</span>
+
                       <button
                         type="button"
-                        disabled={isLoggingOut}
-                        onClick={handleConfirmLogout}
-                        className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg bg-red-600 px-3 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-red-700 active:bg-red-800 disabled:opacity-50 cursor-pointer"
+                        onClick={() => setShowLogoutConfirm(true)}
+                        className="inline-flex items-center justify-center gap-2 rounded-full bg-red-600 px-4 py-2 text-xs font-semibold !text-white shadow-xs transition-colors hover:bg-red-700 active:bg-red-800 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
                       >
-                        {isLoggingOut ? (
-                          <Loader2 className="size-3.5 animate-spin text-white" />
-                        ) : (
-                          <LogOut className="size-3.5 text-white" />
-                        )}
-                        <span>{isLoggingOut ? "Logging out…" : "Log out"}</span>
+                        <LogOut className="size-3.5 !text-white" />
+                        <span className="!text-white">Log out</span>
                       </button>
                     </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : null}
-
-          {activeTab === "general" ? (
-            <div className="flex flex-col gap-4 pt-6 text-sm text-muted-foreground">
-              <p>General application settings and preferences.</p>
-              <div className="rounded-xl border border-border p-4 flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-foreground text-xs">Editor font size</p>
-                  <p className="text-xs text-muted-foreground">Medium (Default)</p>
+                  ) : (
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-red-500/20 bg-red-500/5 p-3.5 animate-in fade-in duration-150">
+                      <span className="text-xs font-medium text-foreground">
+                        Are you sure you want to log out?
+                      </span>
+                      <div className="flex items-center gap-2 self-end sm:self-auto">
+                        <button
+                          type="button"
+                          disabled={isLoggingOut}
+                          onClick={() => setShowLogoutConfirm(false)}
+                          className="rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          disabled={isLoggingOut}
+                          onClick={handleConfirmLogout}
+                          className="inline-flex items-center justify-center gap-1.5 rounded-full bg-red-600 px-4 py-1.5 text-xs font-semibold !text-white shadow-xs transition-colors hover:bg-red-700 active:bg-red-800 disabled:opacity-50 cursor-pointer"
+                        >
+                          {isLoggingOut ? (
+                            <Loader2 className="size-3.5 animate-spin !text-white" />
+                          ) : (
+                            <LogOut className="size-3.5 !text-white" />
+                          )}
+                          <span className="!text-white">{isLoggingOut ? "Logging out…" : "Log out"}</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <span className="text-xs text-muted-foreground">Default</span>
               </div>
-            </div>
-          ) : null}
+            ) : null}
 
-          {activeTab === "security" ? (
-            <div className="flex flex-col gap-4 pt-6 text-sm text-muted-foreground">
-              <div className="rounded-xl border border-border p-4 flex flex-col gap-1.5">
-                <p className="font-medium text-foreground text-xs">Active Session Policy</p>
-                <p className="text-xs text-muted-foreground">
-                  Your session stays active for up to 7 days of continuous inactivity before requiring re-authentication.
-                </p>
+            {activeTab === "general" ? (
+              <div className="flex flex-col gap-4 pt-6 text-sm text-muted-foreground">
+                <p>General application settings and preferences.</p>
+                <div className="rounded-xl border border-border p-4 flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-foreground text-xs">Editor font size</p>
+                    <p className="text-xs text-muted-foreground">Medium (Default)</p>
+                  </div>
+                  <span className="text-xs text-muted-foreground">Default</span>
+                </div>
               </div>
-            </div>
+            ) : null}
+
+            {activeTab === "security" ? (
+              <div className="flex flex-col gap-4 pt-6 text-sm text-muted-foreground">
+                <div className="rounded-xl border border-border p-4 flex flex-col gap-1.5">
+                  <p className="font-medium text-foreground text-xs">Active Session Policy</p>
+                  <p className="text-xs text-muted-foreground">
+                    Your session stays active for up to 7 days of continuous inactivity before requiring re-authentication.
+                  </p>
+                </div>
+              </div>
+            ) : null}
+          </main>
+
+          {/* Bottom Action Footer (Only appears when state changes / isDirty) */}
+          {activeTab === "profile" && isDirty ? (
+            <footer className="flex items-center justify-end gap-2.5 border-t border-border bg-card/80 px-5 py-3.5 md:px-6 animate-in fade-in slide-in-from-bottom-2 duration-150">
+              <button
+                type="button"
+                onClick={() => {
+                  setFullName(profile.fullName);
+                  setIntent(profile.intent);
+                }}
+                disabled={isSaving}
+                className="rounded-full border border-border bg-muted/60 px-4 py-2 text-xs font-semibold text-foreground transition-colors hover:bg-muted cursor-pointer disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={isSaving}
+                className="inline-flex items-center justify-center gap-1.5 rounded-full bg-foreground px-5 py-2 text-xs font-semibold text-background transition-opacity hover:opacity-90 disabled:opacity-50 cursor-pointer"
+              >
+                {isSaving ? <Loader2 className="size-3.5 animate-spin" /> : null}
+                <span>{isSaving ? "Saving…" : "Save"}</span>
+              </button>
+            </footer>
           ) : null}
-        </main>
+        </div>
       </div>
     </div>
   );

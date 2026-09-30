@@ -99,8 +99,6 @@ export function HomeShell() {
         onNewNote={handleNewNote}
         isOpen={isSidebarOpen}
         onToggle={() => setIsSidebarOpen((open) => !open)}
-        profile={profile}
-        onOpenProfile={() => setIsProfileModalOpen(true)}
       />
 
       <div className="relative flex min-w-0 flex-1 flex-col">
