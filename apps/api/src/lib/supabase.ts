@@ -1,7 +1,9 @@
-import { cookies } from "next/headers";
-import { createSupabaseRouteHandlerClient } from "@notter/supabase";
+import { headers } from "next/headers";
+import { createSupabaseBearerClient } from "@notter/supabase";
 
 export async function getSupabaseForRequest() {
-  const cookieStore = await cookies();
-  return createSupabaseRouteHandlerClient(cookieStore);
+  const headerList = await headers();
+  const authHeader = headerList.get("authorization");
+  const token = authHeader?.replace(/^Bearer\s+/i, "").trim();
+  return createSupabaseBearerClient(token || undefined);
 }

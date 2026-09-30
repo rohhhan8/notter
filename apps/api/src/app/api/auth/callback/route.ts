@@ -14,8 +14,16 @@ export async function GET(request: Request) {
   }
 
   try {
-    await exchangeCodeForSession(code);
-    return Response.redirect(`${origin}/onboarding/welcome-back`, 302);
+    const result = await exchangeCodeForSession(code);
+
+    const redirectUrl = new URL(`${origin}/onboarding/welcome-back`);
+    if (result.session) {
+      redirectUrl.searchParams.set("access_token", result.session.accessToken);
+      redirectUrl.searchParams.set("refresh_token", result.session.refreshToken);
+      redirectUrl.searchParams.set("expires_at", String(result.session.expiresAt));
+    }
+
+    return Response.redirect(redirectUrl.toString(), 302);
   } catch (error) {
     console.error(error);
     return Response.redirect(`${origin}/onboarding/sign-in?error=oauth_failed`, 302);
