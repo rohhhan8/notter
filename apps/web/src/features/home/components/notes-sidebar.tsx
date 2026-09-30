@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, PanelLeft } from "lucide-react";
+import { Menu, PanelLeft, SquarePen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Wordmark } from "@/components/wordmark";
 import { Tooltip } from "@/components/ui/tooltip";
@@ -47,15 +47,13 @@ export function NotesSidebar({
         )}
       >
         <div className="flex items-center justify-between px-5 pt-[max(env(safe-area-inset-top),24px)] pb-6">
-          <button type="button" onClick={handleNewNote} aria-label="New note">
-            <Wordmark className="text-lg" />
-          </button>
+          <Wordmark className="text-lg" />
           <Tooltip content="Close sidebar" side="right">
             <button
               type="button"
               onClick={onToggle}
               aria-label="Collapse sidebar"
-              className="flex size-8 shrink-0 items-center justify-center rounded-lg text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              className="flex size-8 shrink-0 items-center justify-center rounded-lg text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer"
             >
               <PanelLeft className="size-4" />
             </button>
@@ -63,6 +61,20 @@ export function NotesSidebar({
         </div>
 
         <nav className="flex-1 overflow-y-auto px-2 pb-4">
+          <div className="mb-2">
+            <button
+              type="button"
+              onClick={handleNewNote}
+              className={cn(
+                "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer",
+                activeNoteId === null && "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
+              )}
+            >
+              <SquarePen className="size-4 shrink-0 text-sidebar-foreground/80" />
+              <span>New note</span>
+            </button>
+          </div>
+
           <ul className="flex flex-col gap-0.5">
             {notes.map((note) => (
               <li key={note.id}>
@@ -70,7 +82,7 @@ export function NotesSidebar({
                   type="button"
                   onClick={() => handleSelectNote(note.id)}
                   className={cn(
-                    "w-full truncate rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                    "w-full truncate rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer",
                     activeNoteId === note.id && "bg-sidebar-accent text-sidebar-accent-foreground",
                   )}
                 >
@@ -88,7 +100,7 @@ export function NotesSidebar({
             type="button"
             onClick={onToggle}
             aria-label="Open sidebar"
-            className="flex size-8 shrink-0 items-center justify-center rounded-lg text-foreground transition-colors hover:bg-muted md:hidden"
+            className="flex size-8 shrink-0 items-center justify-center rounded-lg text-foreground transition-colors hover:bg-muted md:hidden cursor-pointer"
           >
             <Menu className="size-5" />
           </button>
@@ -97,7 +109,7 @@ export function NotesSidebar({
               type="button"
               onClick={onToggle}
               aria-label="Open sidebar"
-              className="group hidden size-8 shrink-0 items-center justify-center rounded-lg text-foreground transition-colors hover:bg-muted md:flex"
+              className="group hidden size-8 shrink-0 items-center justify-center rounded-lg text-foreground transition-colors hover:bg-muted md:flex cursor-pointer"
             >
               <span className="font-wordmark text-lg font-extrabold tracking-tight lowercase group-hover:hidden">
                 n.
