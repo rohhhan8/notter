@@ -352,59 +352,56 @@ function ProfileModalContent({
                 </div>
               </div>
 
-              {/* Danger Zone: Log Out */}
-              <div className="mt-4 pt-6 border-t border-border flex flex-col gap-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-xs font-semibold text-destructive uppercase tracking-wider">Account Action</h3>
-                    <p className="text-xs text-muted-foreground">Sign out of your active session on this device.</p>
-                  </div>
+              {/* Account Action: Log Out */}
+              <div className="mt-2 pt-6 pb-6 border-t border-border flex flex-col gap-3">
+                {!showLogoutConfirm ? (
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Log out</p>
+                      <p className="text-xs text-muted-foreground">Log out of your account on this device</p>
+                    </div>
 
-                  {!showLogoutConfirm ? (
-                    <Button
+                    <button
                       type="button"
-                      variant="destructive"
-                      size="sm"
                       onClick={() => setShowLogoutConfirm(true)}
-                      className="h-8 gap-1.5 text-xs font-medium bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-red-600 px-3.5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-red-700 active:bg-red-800 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 dark:bg-red-600 dark:hover:bg-red-500"
                     >
-                      <LogOut className="size-3.5" />
-                      Log out
-                    </Button>
-                  ) : null}
-                </div>
-
-                {/* Logout Confirmation State */}
-                {showLogoutConfirm ? (
-                  <div className="flex flex-col gap-3 rounded-xl border border-destructive/20 bg-destructive/5 p-4 animate-in fade-in duration-200">
+                      <LogOut className="size-3.5 text-white" />
+                      <span>Log out</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-red-500/20 bg-red-500/5 p-4 animate-in fade-in duration-150">
                     <p className="text-xs font-medium text-foreground">
-                      Are you sure you want to log out? You will need to sign in again.
+                      Are you sure you want to log out?
                     </p>
-                    <div className="flex items-center gap-2 justify-end">
+                    <div className="flex items-center gap-2 self-end sm:self-auto">
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
                         disabled={isLoggingOut}
                         onClick={() => setShowLogoutConfirm(false)}
-                        className="h-7 text-xs"
+                        className="h-8 text-xs text-muted-foreground hover:text-foreground"
                       >
                         Cancel
                       </Button>
-                      <Button
+                      <button
                         type="button"
-                        variant="destructive"
-                        size="sm"
                         disabled={isLoggingOut}
                         onClick={handleConfirmLogout}
-                        className="h-7 gap-1.5 text-xs bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg bg-red-600 px-3 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-red-700 active:bg-red-800 disabled:opacity-50 cursor-pointer"
                       >
-                        {isLoggingOut ? <Loader2 className="size-3 animate-spin" /> : <LogOut className="size-3" />}
-                        {isLoggingOut ? "Logging out…" : "Confirm Log out"}
-                      </Button>
+                        {isLoggingOut ? (
+                          <Loader2 className="size-3.5 animate-spin text-white" />
+                        ) : (
+                          <LogOut className="size-3.5 text-white" />
+                        )}
+                        <span>{isLoggingOut ? "Logging out…" : "Log out"}</span>
+                      </button>
                     </div>
                   </div>
-                ) : null}
+                )}
               </div>
             </div>
           ) : null}
