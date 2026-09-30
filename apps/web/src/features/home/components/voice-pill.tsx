@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Mic, Square } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const BAR_COUNT = 5;
 const BAR_ANIMATION_DELAYS_MS = [0, 120, 240, 360, 480];
 
 interface VoicePillProps {
@@ -18,7 +17,6 @@ export function VoicePill({ onStop, className }: VoicePillProps) {
 
   useEffect(() => {
     if (!isListening) return;
-    setElapsedMs(0);
     const interval = window.setInterval(() => setElapsedMs((ms) => ms + 100), 100);
     return () => window.clearInterval(interval);
   }, [isListening]);
@@ -28,6 +26,7 @@ export function VoicePill({ onStop, className }: VoicePillProps) {
       setIsListening(false);
       onStop?.();
     } else {
+      setElapsedMs(0);
       setIsListening(true);
     }
   }

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createProfileClient } from "@notter/api-client";
+import { createProfileClient, authStorage } from "@notter/api-client";
 import { getApiBaseUrl } from "@/lib/env";
 import { useOnboardingNavigate } from "@/features/onboarding/components/onboarding-flow";
 
@@ -17,6 +17,24 @@ export function WelcomeBackScreen() {
 
   useEffect(() => {
     let cancelled = false;
+
+    // Check if OAuth tokens were passed via query parameters
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const accessToken = params.get("access_token");
+      const refreshToken = params.get("refresh_token");
+      const expiresAt = Number(params.get("expires_at")) || Math.floor(Date.now() / 1000) + 3600;
+
+      if (accessToken && refreshToken) {
+        authStorage.set({
+          accessToken,
+          refreshToken,
+          expiresAt,
+        });
+        // Clean URL query parameters to avoid keeping tokens in browser history
+        window.history.replaceState(null, "", window.location.pathname);
+      }
+    }
 
     async function loadProfile() {
       const client = createProfileClient({ baseUrl: getApiBaseUrl() });

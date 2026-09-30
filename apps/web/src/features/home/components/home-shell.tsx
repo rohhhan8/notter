@@ -21,11 +21,7 @@ export function HomeShell() {
   const [notes, setNotes] = useState<Note[]>(mockNotes);
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  useEffect(() => {
-    if (window.innerWidth >= 768) setIsSidebarOpen(true);
-  }, []);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => typeof window !== "undefined" && window.innerWidth >= 768);
 
   useEffect(() => {
     let cancelled = false;
@@ -125,7 +121,7 @@ export function HomeShell() {
           <main className="flex flex-1 flex-col items-center justify-center gap-6 px-6 text-center">
             <div className="flex flex-col gap-1">
               <p className="text-sm font-medium text-muted-foreground">
-                {profile.fullName.split(" ")[0]}, what's on your mind?
+                {profile.fullName.split(" ")[0]}, what&apos;s on your mind?
               </p>
               <h1 className="font-heading text-3xl leading-[1.15] font-semibold tracking-tight text-balance sm:text-4xl">
                 Take a new note
