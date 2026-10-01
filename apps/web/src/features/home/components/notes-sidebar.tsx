@@ -1,17 +1,19 @@
 "use client";
 
+import { useState } from "react";
 import { Menu, PanelLeft, SquarePen, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Wordmark } from "@/components/wordmark";
 import { Tooltip } from "@/components/ui/tooltip";
 import type { NoteSummary } from "@notter/types";
+import { DeleteNoteModal } from "./delete-note-modal";
 
 interface NotesSidebarProps {
   notes: NoteSummary[];
   activeNoteId: string | null;
   onSelectNote: (id: string) => void;
   onNewNote: () => void;
-  onDeleteNote?: (id: string) => void;
+  onDeleteNote?: (id: string) => Promise<void> | void;
   isOpen: boolean;
   onToggle: () => void;
 }
@@ -25,6 +27,8 @@ export function NotesSidebar({
   isOpen,
   onToggle,
 }: NotesSidebarProps) {
+  const [pendingDeleteNote, setPendingDeleteNote] = useState<NoteSummary | null>(null);
+
   function handleSelectNote(id: string) {
     onSelectNote(id);
     if (window.innerWidth < 768) onToggle();
@@ -96,9 +100,9 @@ export function NotesSidebar({
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onDeleteNote(note.id);
+                      setPendingDeleteNote(note);
                     }}
-                    className="absolute right-1.5 hidden size-6 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive group-hover:flex cursor-pointer"
+                    className="absolute right-1.5 flex md:hidden md:group-hover:flex size-6 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive cursor-pointer"
                     aria-label={`Delete ${note.title}`}
                     title="Delete note"
                   >
@@ -136,6 +140,17 @@ export function NotesSidebar({
           </Tooltip>
         </div>
       ) : null}
+
+      <DeleteNoteModal
+        isOpen={Boolean(pendingDeleteNote)}
+        noteTitle={pendingDeleteNote?.title ?? ""}
+        onClose={() => setPendingDeleteNote(null)}
+        onConfirm={async () => {
+          if (pendingDeleteNote && onDeleteNote) {
+            await onDeleteNote(pendingDeleteNote.id);
+          }
+        }}
+      />
     </>
   );
 }
