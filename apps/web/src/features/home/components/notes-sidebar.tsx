@@ -38,12 +38,12 @@ export function NotesSidebar({
   return (
     <>
       {isOpen ? (
-        <div role="presentation" onClick={onToggle} className="fixed inset-0 z-20 bg-foreground/20 md:hidden" />
+        <div role="presentation" onClick={onToggle} className="fixed inset-0 z-40 bg-foreground/20 backdrop-blur-xs md:hidden" />
       ) : null}
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-30 flex h-full w-72 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-transform duration-200 ease-out md:static md:transition-[margin-left,width]",
+          "fixed inset-y-0 left-0 z-50 flex h-full w-72 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-transform duration-200 ease-out md:static md:z-auto md:transition-[margin-left,width]",
           isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
           isOpen ? "md:ml-0 md:w-72" : "md:-ml-72 md:w-72",
         )}

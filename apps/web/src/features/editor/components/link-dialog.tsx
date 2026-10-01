@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect, type FormEvent } from "react";
+import { useState, useRef, type FormEvent } from "react";
 import type { Editor } from "@tiptap/react";
 import { Link2, Unlink, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { DropdownPortal } from "./dropdown-portal";
 
 interface LinkDialogProps {
   editor: Editor;
@@ -12,27 +13,17 @@ interface LinkDialogProps {
 export function LinkDialog({ editor }: LinkDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [url, setUrl] = useState("");
-  const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const isLinkActive = editor.isActive("link");
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   function handleToggleOpen() {
     if (!isOpen) {
       const previousUrl = (editor.getAttributes("link").href as string) || "";
       setUrl(previousUrl);
       setIsOpen(true);
-      setTimeout(() => inputRef.current?.focus(), 50);
+      setTimeout(() => inputRef.current?.focus(), 60);
     } else {
       setIsOpen(false);
     }
@@ -63,12 +54,13 @@ export function LinkDialog({ editor }: LinkDialogProps) {
   }
 
   return (
-    <div ref={containerRef} className="relative">
+    <div className="relative shrink-0">
       <button
+        ref={buttonRef}
         type="button"
         onClick={handleToggleOpen}
         className={cn(
-          "inline-flex h-8 items-center justify-center rounded-md px-2 text-xs font-medium transition-colors cursor-pointer",
+          "inline-flex h-8 shrink-0 items-center justify-center rounded-md px-2 text-xs font-medium transition-colors cursor-pointer",
           isLinkActive
             ? "bg-primary/15 text-primary font-semibold"
             : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -79,10 +71,16 @@ export function LinkDialog({ editor }: LinkDialogProps) {
         <Link2 className="size-3.5" />
       </button>
 
-      {isOpen && (
+      <DropdownPortal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        triggerRef={buttonRef}
+        width={256}
+        className="w-64"
+      >
         <form
           onSubmit={handleApply}
-          className="absolute top-full left-0 mt-1 flex w-64 items-center gap-1.5 rounded-lg border border-border bg-card p-1.5 shadow-lg z-50 animate-in fade-in duration-100"
+          className="flex w-full items-center gap-1.5 rounded-lg border border-border bg-card p-1.5 shadow-xl animate-in fade-in duration-100"
         >
           <input
             ref={inputRef}
@@ -112,7 +110,8 @@ export function LinkDialog({ editor }: LinkDialogProps) {
             </button>
           )}
         </form>
-      )}
+      </DropdownPortal>
     </div>
   );
 }
+

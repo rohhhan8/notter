@@ -56,9 +56,9 @@ export function EditorToolbar({ editor, isDirty, onSave }: EditorToolbarProps) {
     <div
       role="toolbar"
       aria-label="Editor toolbar"
-      className="sticky top-0 z-40 flex flex-wrap items-center justify-between gap-1.5 border-b border-border/80 bg-card/95 px-3 py-2 backdrop-blur-md"
+      className="sticky top-0 z-10 flex items-center justify-between border-b border-border/80 bg-card/95 px-2 sm:px-3 py-1.5 backdrop-blur-md"
     >
-      <div className="flex flex-wrap items-center gap-1">
+      <div className="flex items-center gap-1 overflow-x-auto no-scrollbar scroll-smooth flex-1 min-w-0 pr-2">
         {/* Undo / Redo */}
         <ToolbarButton
           onClick={() => editor.chain().focus().undo().run()}
@@ -73,12 +73,12 @@ export function EditorToolbar({ editor, isDirty, onSave }: EditorToolbarProps) {
           icon={<Redo2 className="size-3.5" />}
         />
 
-        <div className="h-4 w-px bg-border/60 mx-1 hidden sm:block" />
+        <div className="h-4 w-px bg-border/60 mx-0.5 shrink-0" />
 
         {/* Heading Hierarchy Selector */}
         <HeadingSelector editor={editor} />
 
-        <div className="h-4 w-px bg-border/60 mx-1 hidden sm:block" />
+        <div className="h-4 w-px bg-border/60 mx-0.5 shrink-0" />
 
         {/* Inline Marks */}
         <ToolbarButton
@@ -112,7 +112,7 @@ export function EditorToolbar({ editor, isDirty, onSave }: EditorToolbarProps) {
         {/* Hyperlink Dialog */}
         <LinkDialog editor={editor} />
 
-        <div className="h-4 w-px bg-border/60 mx-1 hidden sm:block" />
+        <div className="h-4 w-px bg-border/60 mx-0.5 shrink-0" />
 
         {/* Lists & Tasks */}
         <ToolbarButton
@@ -134,7 +134,7 @@ export function EditorToolbar({ editor, isDirty, onSave }: EditorToolbarProps) {
           icon={<CheckSquare className="size-3.5" />}
         />
 
-        <div className="h-4 w-px bg-border/60 mx-1 hidden sm:block" />
+        <div className="h-4 w-px bg-border/60 mx-0.5 shrink-0" />
 
         {/* Blocks & Rich Elements */}
         <ToolbarButton
@@ -164,8 +164,8 @@ export function EditorToolbar({ editor, isDirty, onSave }: EditorToolbarProps) {
         />
       </div>
 
-      {/* Save Action with Dirty State Indicator */}
-      <div className="ml-auto pl-2">
+      {/* Save Action with Dirty State Indicator pinned on the right */}
+      <div className="shrink-0 flex items-center pl-2 sm:pl-3 border-l border-border/60 bg-card z-10">
         <SaveButton isDirty={isDirty} onSave={onSave} />
       </div>
     </div>

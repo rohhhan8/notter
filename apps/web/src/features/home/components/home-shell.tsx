@@ -252,7 +252,7 @@ export function HomeShell() {
       />
 
       <div className="relative flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-end px-6 pt-[max(env(safe-area-inset-top),24px)] pb-4">
+        <header className="flex items-center justify-end px-3 sm:px-6 pt-[max(env(safe-area-inset-top),16px)] sm:pt-[max(env(safe-area-inset-top),24px)] pb-2 sm:pb-4">
           <button
             type="button"
             onClick={() => setIsProfileModalOpen(true)}
@@ -275,7 +275,7 @@ export function HomeShell() {
 
         {activeNoteId ? (
           isLoadingNote || !activeNote ? (
-            <main className="flex-1 min-h-0 flex flex-col px-4 sm:px-6 pt-0 pb-3 overflow-hidden">
+            <main className="flex-1 min-h-0 flex flex-col px-2.5 sm:px-6 pt-0 pb-2 sm:pb-3 overflow-hidden">
               <div className="mx-auto max-w-3xl w-full flex-1 min-h-0 flex flex-col rounded-2xl border border-border bg-card p-8 items-center justify-center gap-3">
                 <Loader2 className="size-6 animate-spin text-primary" />
                 <p className="text-xs font-mono text-muted-foreground">Loading note content...</p>
@@ -283,7 +283,7 @@ export function HomeShell() {
             </main>
           ) : (
             <>
-              <main className="flex-1 min-h-0 flex flex-col px-4 sm:px-6 pt-0 pb-3 overflow-hidden">
+              <main className="flex-1 min-h-0 flex flex-col px-2.5 sm:px-6 pt-0 pb-2 sm:pb-3 overflow-hidden">
                 <div className="mx-auto max-w-3xl w-full flex-1 min-h-0 flex flex-col">
                   <NoterEditor
                     key={activeNote.id}
@@ -295,7 +295,7 @@ export function HomeShell() {
                   />
                 </div>
               </main>
-              <div className="px-6 pb-[max(env(safe-area-inset-bottom),24px)]">
+              <div className="px-3 sm:px-6 pb-[max(env(safe-area-inset-bottom),16px)] sm:pb-[max(env(safe-area-inset-bottom),24px)]">
                 <PromptComposer
                   onSubmit={handlePromptSubmit}
                   isGenerating={isGenerating}

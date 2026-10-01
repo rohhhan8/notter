@@ -60,7 +60,7 @@ export function NoterEditor({
     editorProps: {
       attributes: {
         class: cn(
-          "prose prose-neutral dark:prose-invert max-w-none focus:outline-none min-h-[320px] px-6 py-6 text-[0.95rem] leading-7",
+          "prose prose-neutral dark:prose-invert max-w-none focus:outline-none min-h-[320px] px-3.5 sm:px-6 py-4 sm:py-6 text-[0.95rem] leading-7",
           "[&_h1]:text-2xl [&_h1]:font-bold [&_h1]:tracking-tight [&_h1]:mt-6 [&_h1]:mb-3 [&_h1]:text-foreground",
           "[&_h2]:text-xl [&_h2]:font-bold [&_h2]:tracking-tight [&_h2]:mt-6 [&_h2]:mb-2.5 [&_h2]:text-foreground",
           "[&_h3]:text-lg [&_h3]:font-semibold [&_h3]:mt-5 [&_h3]:mb-2 [&_h3]:text-foreground",
@@ -98,10 +98,10 @@ export function NoterEditor({
       )}
     >
       {/* Pinned Top Area: Toolbar + Note Header (Never scrolls) */}
-      <div className="shrink-0 z-30 bg-card border-b border-border/60">
+      <div className="shrink-0 z-10 bg-card border-b border-border/60">
         <EditorToolbar editor={editor} isDirty={isDirty} onSave={handleSave} />
 
-        <div className="px-6 pt-3.5 pb-3 border-t border-border/40">
+        <div className="px-3.5 sm:px-6 pt-2.5 sm:pt-3.5 pb-2.5 sm:pb-3 border-t border-border/40">
           <div className="flex items-center gap-2 mb-1.5">
             {mode && (
               <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-[10px] font-mono font-semibold text-primary">
@@ -127,7 +127,7 @@ export function NoterEditor({
 
       {/* Scrollable Editable Tiptap Document Surface */}
       <div
-        className="flex-1 min-h-0 overflow-y-auto bg-card cursor-text px-1"
+        className="flex-1 min-h-0 overflow-y-auto overflow-x-auto bg-card cursor-text px-1"
         onClick={() => editor?.commands.focus()}
       >
         <EditorContent editor={editor} />
