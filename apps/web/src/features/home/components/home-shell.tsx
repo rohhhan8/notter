@@ -191,7 +191,12 @@ export function HomeShell() {
               <NoteView note={activeNote} isStreaming={isGenerating && activeNoteId === activeNote.id} />
             </main>
             <div className="px-6 pb-[max(env(safe-area-inset-bottom),24px)]">
-              <PromptComposer onSubmit={handlePromptSubmit} isGenerating={isGenerating} className="mx-auto max-w-2xl" />
+              <PromptComposer
+                onSubmit={handlePromptSubmit}
+                isGenerating={isGenerating}
+                className="mx-auto max-w-2xl"
+                dropdownPosition="top"
+              />
             </div>
           </>
         ) : (
@@ -204,7 +209,12 @@ export function HomeShell() {
                 Capture, clarify, create.
               </h1>
             </div>
-            <PromptComposer onSubmit={handlePromptSubmit} isGenerating={isGenerating} className="max-w-2xl" />
+            <PromptComposer
+              onSubmit={handlePromptSubmit}
+              isGenerating={isGenerating}
+              className="max-w-2xl"
+              dropdownPosition="bottom"
+            />
           </main>
         )}
       </div>

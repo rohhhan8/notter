@@ -6,7 +6,6 @@ export type NoteMode =
   | "research"
   | "technical"
   | "meeting"
-  | "book"
   | "idea";
 
 export interface Note {

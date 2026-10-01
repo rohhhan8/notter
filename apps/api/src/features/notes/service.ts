@@ -23,8 +23,6 @@ const MODE_INSTRUCTIONS: Record<string, string> = {
     "Mode: /technical (Programming/technical knowledge). Emphasize architecture, concrete production-ready code snippets with language syntax, performance & algorithmic complexity, design patterns, and edge case caveats.",
   meeting:
     "Mode: /meeting (Work/meeting notes). Highlight Meeting Context/Goals, Agenda Breakdown, Summary of Discussions, Decisions Reached, and a distinct Action Items checklist with assignees and follow-ups.",
-  book:
-    "Mode: /book (Books/chapters). Structure with Book Title & Author Thesis, Central Themes & Chapter Breakdown, Memorable Quotes, Practical Frameworks/Lessons, and Critical Synthesis.",
   idea:
     "Mode: /idea (Ideas/brain dumps). Unpack, organize, and expand upon raw thoughts, identify the Unique Value Proposition, analyze feasibility & potential risks, and outline immediate rapid-validation experiments.",
 };

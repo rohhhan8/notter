@@ -19,7 +19,6 @@ import {
   Microscope,
   Code2,
   Users,
-  BookOpen,
   Lightbulb,
 } from "lucide-react";
 import type { NoteMode } from "@notter/types";
@@ -85,13 +84,6 @@ export const SLASH_COMMANDS: SlashCommand[] = [
     icon: Users,
   },
   {
-    key: "book",
-    command: "/book",
-    label: "Book",
-    description: "Books/chapters",
-    icon: BookOpen,
-  },
-  {
     key: "idea",
     command: "/idea",
     label: "Idea",
@@ -104,9 +96,15 @@ interface PromptComposerProps {
   onSubmit: (prompt: string, mode?: NoteMode) => void;
   isGenerating?: boolean;
   className?: string;
+  dropdownPosition?: "top" | "bottom";
 }
 
-export function PromptComposer({ onSubmit, isGenerating, className }: PromptComposerProps) {
+export function PromptComposer({
+  onSubmit,
+  isGenerating,
+  className,
+  dropdownPosition = "bottom",
+}: PromptComposerProps) {
   const [value, setValue] = useState("");
   const [activeMode, setActiveMode] = useState<SlashCommand | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -254,7 +252,12 @@ export function PromptComposer({ onSubmit, isGenerating, className }: PromptComp
         <div
           role="listbox"
           aria-label="Slash commands"
-          className="absolute bottom-full left-0 mb-3 w-full sm:w-80 md:w-96 rounded-2xl border border-border bg-card/95 p-1.5 shadow-2xl backdrop-blur-md z-50 animate-in fade-in slide-in-from-bottom-2 duration-150"
+          className={cn(
+            "absolute left-0 w-full sm:w-80 md:w-96 rounded-2xl border border-border bg-card/95 p-1.5 shadow-2xl backdrop-blur-md z-50 animate-in fade-in duration-150",
+            dropdownPosition === "top"
+              ? "bottom-full mb-3 slide-in-from-bottom-2"
+              : "top-full mt-3 slide-in-from-top-2"
+          )}
         >
           <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-border/40 mb-1">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
