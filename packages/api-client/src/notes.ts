@@ -10,6 +10,7 @@ export function createNotesClient({ baseUrl }: NotesClientOptions) {
     async generateStream({
       prompt,
       intent,
+      mode,
       onDelta,
       signal,
     }: GenerateNoteRequest & {
@@ -32,7 +33,7 @@ export function createNotesClient({ baseUrl }: NotesClientOptions) {
       const response = await fetch(`${baseUrl}/api/notes/generate`, {
         method: "POST",
         headers,
-        body: JSON.stringify({ prompt, intent }),
+        body: JSON.stringify({ prompt, intent, mode }),
         signal,
       });
 

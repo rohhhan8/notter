@@ -8,7 +8,31 @@ function getGroqClient(): Groq {
   return new Groq({ apiKey });
 }
 
-export function buildNoteSystemPrompt(userIntent?: string): string {
+const MODE_INSTRUCTIONS: Record<string, string> = {
+  general:
+    "Mode: /general (Anything). Format as a versatile, well-rounded, comprehensive note suitable for any topic.",
+  school:
+    "Mode: /school (School-level learning). Focus on foundational clarity, intuitive explanations, memorable real-world analogies, core concepts, and beginner-friendly practice questions/exercises.",
+  lecture:
+    "Mode: /lecture (Classroom/lecture notes). Structure clearly with Lecture Topic, Professor's core thesis/arguments, blackboard breakdown, key definitions, lecture highlights, and exam-relevant review questions.",
+  university:
+    "Mode: /university (University-level academic notes). Maintain rigorous analytical depth, theoretical foundations, key theorems/proofs/models, scholarly debates, and academic reading references.",
+  research:
+    "Mode: /research (Research/thesis material). Structure with Research Objectives, Literature Context, Methodological Framework, Detailed Analytical Findings, Theoretical Implications, and Open Research Directions.",
+  technical:
+    "Mode: /technical (Programming/technical knowledge). Emphasize architecture, concrete production-ready code snippets with language syntax, performance & algorithmic complexity, design patterns, and edge case caveats.",
+  meeting:
+    "Mode: /meeting (Work/meeting notes). Highlight Meeting Context/Goals, Agenda Breakdown, Summary of Discussions, Decisions Reached, and a distinct Action Items checklist with assignees and follow-ups.",
+  book:
+    "Mode: /book (Books/chapters). Structure with Book Title & Author Thesis, Central Themes & Chapter Breakdown, Memorable Quotes, Practical Frameworks/Lessons, and Critical Synthesis.",
+  idea:
+    "Mode: /idea (Ideas/brain dumps). Unpack, organize, and expand upon raw thoughts, identify the Unique Value Proposition, analyze feasibility & potential risks, and outline immediate rapid-validation experiments.",
+};
+
+export function buildNoteSystemPrompt(userIntent?: string, mode?: string): string {
+  const modeKey = mode ? mode.replace(/^\//, "").toLowerCase() : undefined;
+  const modeGuidance = modeKey && MODE_INSTRUCTIONS[modeKey] ? MODE_INSTRUCTIONS[modeKey] : "";
+
   const intentContext = userIntent
     ? `The user's purpose for taking notes in Notter is '${userIntent}'. Tailor the depth, tone, and practical focus to best serve this purpose (e.g., actionable and structured for 'work', thorough and conceptual for 'study', reflective and practical for 'personal').`
     : "";
@@ -16,6 +40,7 @@ export function buildNoteSystemPrompt(userIntent?: string): string {
   return `You are Notter, an elite AI note-taking and reasoning companion.
 Your mission is to analyze the user's prompt, raw thoughts, or question, and generate a clear, beautifully structured, insightful personal note.
 
+${modeGuidance ? `ACTIVE FORMAT INSTRUCTION:\n${modeGuidance}\n` : ""}
 ${intentContext}
 
 Format the note strictly in Markdown using the following structure:
@@ -28,7 +53,7 @@ Format the note strictly in Markdown using the following structure:
 
 3. STRUCTURED SECTIONS (Headings & Subheadings):
    - Use '## ' for main sections and '### ' for subsections.
-   - Deconstruct the topic logically into pillars, key components, or strategic steps.
+   - Deconstruct the topic logically into pillars, key components, or strategic steps according to the active format.
    - Use clear bullet points ('- ') for details, facts, and insights.
    - Use strategic bolding (**key concepts**) to make the note scannable.
    - Use blockquotes ('> ') for memorable takeaways, core principles, or key caveats.
@@ -45,14 +70,16 @@ Tone & Aesthetic:
 export interface GenerateNoteStreamOptions {
   prompt: string;
   intent?: string;
+  mode?: string;
 }
 
 export async function generateNoteStream({
   prompt,
   intent,
+  mode,
 }: GenerateNoteStreamOptions): Promise<ReadableStream<Uint8Array>> {
   const groq = getGroqClient();
-  const systemPrompt = buildNoteSystemPrompt(intent);
+  const systemPrompt = buildNoteSystemPrompt(intent, mode);
 
   const chatCompletion = await groq.chat.completions.create({
     messages: [

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Settings } from "lucide-react";
 import { createOnboardingClient, createProfileClient, createNotesClient } from "@notter/api-client";
-import type { Profile } from "@notter/types";
+import type { Profile, NoteMode } from "@notter/types";
 import { getApiBaseUrl } from "@/lib/env";
 import { LoadingScreen } from "@/components/loading-screen";
 import { NotesSidebar } from "@/features/home/components/notes-sidebar";
@@ -90,7 +90,7 @@ export function HomeShell() {
     setActiveNoteId(null);
   }
 
-  async function handlePromptSubmit(prompt: string) {
+  async function handlePromptSubmit(prompt: string, mode?: NoteMode) {
     setIsGenerating(true);
     const newId = crypto.randomUUID();
     const initialTitle = prompt.length > 50 ? `${prompt.slice(0, 50)}…` : prompt;
@@ -100,6 +100,7 @@ export function HomeShell() {
       title: initialTitle,
       content: "",
       createdAt: new Date().toISOString(),
+      mode,
     };
 
     setNotes((current) => [newNote, ...current]);
@@ -112,6 +113,7 @@ export function HomeShell() {
       await client.generateStream({
         prompt,
         intent: profile?.intent,
+        mode,
         onDelta: (delta) => {
           accumulated += delta;
 

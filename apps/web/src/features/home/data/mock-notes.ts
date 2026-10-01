@@ -3,6 +3,7 @@ export interface Note {
   title: string;
   content: string;
   createdAt: string;
+  mode?: string;
 }
 
 export const mockNotes: Note[] = [

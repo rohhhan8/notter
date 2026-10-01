@@ -24,7 +24,14 @@ export function NoteView({ note, isStreaming }: { note: Note; isStreaming?: bool
 
   return (
     <article className="mx-auto w-full max-w-2xl pb-16">
-      <p className="text-xs font-medium text-muted-foreground">{formatDate(note.createdAt)}</p>
+      <div className="flex items-center gap-2.5">
+        <p className="text-xs font-medium text-muted-foreground">{formatDate(note.createdAt)}</p>
+        {note.mode ? (
+          <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-[10px] font-mono font-semibold text-primary">
+            /{note.mode}
+          </span>
+        ) : null}
+      </div>
       <h1 className="mt-2 font-heading text-2xl sm:text-3xl font-bold tracking-tight text-foreground text-balance">
         {note.title}
       </h1>

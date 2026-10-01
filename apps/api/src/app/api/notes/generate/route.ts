@@ -29,6 +29,7 @@ export async function POST(request: Request) {
     const stream = await generateNoteStream({
       prompt: body.prompt.trim(),
       intent: body.intent,
+      mode: body.mode,
     });
 
     return new Response(stream, {
