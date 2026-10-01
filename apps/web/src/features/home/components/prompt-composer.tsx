@@ -127,6 +127,16 @@ export function PromptComposer({
 
   const safeSelectedIndex = Math.min(selectedIndex, Math.max(0, filteredCommands.length - 1));
 
+  // Auto-grow textarea height as content expands (ChatGPT style)
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    textarea.style.height = "auto";
+    const nextHeight = Math.min(textarea.scrollHeight, 220);
+    textarea.style.height = `${nextHeight}px`;
+    textarea.style.overflowY = textarea.scrollHeight > 220 ? "auto" : "hidden";
+  }, [value]);
+
   // Click outside to close slash menu
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -350,7 +360,7 @@ export function PromptComposer({
           }
           rows={1}
           disabled={isGenerating}
-          className="min-w-0 max-h-40 flex-1 resize-none bg-transparent text-[0.95rem] leading-6 text-foreground outline-none placeholder:text-muted-foreground/80 pb-1.5 disabled:opacity-60"
+          className="min-w-0 max-h-56 flex-1 resize-none bg-transparent text-[0.95rem] leading-6 text-foreground outline-none placeholder:text-muted-foreground/80 pb-1.5 disabled:opacity-60"
         />
 
         <VoicePill />
