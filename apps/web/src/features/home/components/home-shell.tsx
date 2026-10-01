@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Settings } from "lucide-react";
-import { createOnboardingClient, createProfileClient } from "@notter/api-client";
+import { createOnboardingClient, createProfileClient, createNotesClient } from "@notter/api-client";
 import type { Profile } from "@notter/types";
 import { getApiBaseUrl } from "@/lib/env";
 import { LoadingScreen } from "@/components/loading-screen";
@@ -12,14 +12,29 @@ import { NoteView } from "@/features/home/components/note-view";
 import { PromptComposer } from "@/features/home/components/prompt-composer";
 import { mockNotes, type Note } from "@/features/home/data/mock-notes";
 import { ProfileModal } from "@/features/profile/components/profile-modal";
+import { toast } from "@/components/ui/toast";
 
-const GENERATE_DELAY_MS = 900;
+const NOTES_STORAGE_KEY = "notter_user_notes";
+
+function getInitialNotes(): Note[] {
+  if (typeof window === "undefined") return mockNotes;
+  try {
+    const saved = localStorage.getItem(NOTES_STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch {
+    // fallback
+  }
+  return mockNotes;
+}
 
 export function HomeShell() {
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null | undefined>(undefined);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [notes, setNotes] = useState<Note[]>(mockNotes);
+  const [notes, setNotes] = useState<Note[]>(getInitialNotes);
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => typeof window !== "undefined" && window.innerWidth >= 768);
@@ -57,6 +72,14 @@ export function HomeShell() {
     };
   }, [router]);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(notes));
+    } catch {
+      // ignore
+    }
+  }, [notes]);
+
   async function handleSignOut() {
     const client = createOnboardingClient({ baseUrl: getApiBaseUrl() });
     await client.signOut();
@@ -69,19 +92,56 @@ export function HomeShell() {
 
   async function handlePromptSubmit(prompt: string) {
     setIsGenerating(true);
-    // TODO: replace with a real AI call that turns the prompt into note content.
-    await new Promise((resolve) => window.setTimeout(resolve, GENERATE_DELAY_MS));
+    const newId = crypto.randomUUID();
+    const initialTitle = prompt.length > 50 ? `${prompt.slice(0, 50)}…` : prompt;
 
-    const note: Note = {
-      id: crypto.randomUUID(),
-      title: prompt.length > 60 ? `${prompt.slice(0, 60)}…` : prompt,
-      content: prompt,
+    const newNote: Note = {
+      id: newId,
+      title: initialTitle,
+      content: "",
       createdAt: new Date().toISOString(),
     };
 
-    setNotes((current) => [note, ...current]);
-    setActiveNoteId(note.id);
-    setIsGenerating(false);
+    setNotes((current) => [newNote, ...current]);
+    setActiveNoteId(newId);
+
+    try {
+      const client = createNotesClient({ baseUrl: getApiBaseUrl() });
+      let accumulated = "";
+
+      await client.generateStream({
+        prompt,
+        intent: profile?.intent,
+        onDelta: (delta) => {
+          accumulated += delta;
+
+          // Check if markdown title has streamed in (e.g. # Some Title)
+          let dynamicTitle = initialTitle;
+          const match = accumulated.match(/^#\s+([^\n]+)/);
+          if (match && match[1]) {
+            dynamicTitle = match[1].trim();
+          }
+
+          setNotes((current) =>
+            current.map((n) =>
+              n.id === newId
+                ? {
+                    ...n,
+                    title: dynamicTitle,
+                    content: accumulated,
+                  }
+                : n
+            )
+          );
+        },
+      });
+      toast.success("Note created successfully");
+    } catch (error) {
+      console.error("Failed to generate note:", error);
+      toast.error("Failed to generate note", "Please check your network and try again.");
+    } finally {
+      setIsGenerating(false);
+    }
   }
 
   if (!profile) {
@@ -126,7 +186,7 @@ export function HomeShell() {
         {activeNote ? (
           <>
             <main className="flex-1 overflow-y-auto px-6 py-8">
-              <NoteView note={activeNote} />
+              <NoteView note={activeNote} isStreaming={isGenerating && activeNoteId === activeNote.id} />
             </main>
             <div className="px-6 pb-[max(env(safe-area-inset-bottom),24px)]">
               <PromptComposer onSubmit={handlePromptSubmit} isGenerating={isGenerating} className="mx-auto max-w-2xl" />
@@ -138,8 +198,8 @@ export function HomeShell() {
               <p className="text-sm font-medium text-muted-foreground">
                 {profile.fullName.split(" ")[0]}, what&apos;s on your mind?
               </p>
-              <h1 className="font-heading text-3xl leading-[1.15] font-semibold tracking-tight text-balance sm:text-4xl">
-                Take a new note
+              <h1 className="font-heading text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+                Capture, clarify, create.
               </h1>
             </div>
             <PromptComposer onSubmit={handlePromptSubmit} isGenerating={isGenerating} className="max-w-2xl" />
