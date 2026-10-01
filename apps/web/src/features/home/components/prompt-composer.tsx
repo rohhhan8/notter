@@ -365,37 +365,20 @@ export function PromptComposer({
         />
 
         {/* Bottom Action Strip (ChatGPT style) */}
-        <div className="flex items-center justify-between pt-1">
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => {
-                setIsMenuOpen((prev) => !prev);
-                textareaRef.current?.focus();
-              }}
-              className="flex size-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground cursor-pointer text-xs font-mono font-bold"
-              aria-label="Toggle slash shortcuts"
-              title="Note Formats (/)"
-            >
-              /
-            </button>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <VoicePill />
-            <button
-              type="submit"
-              disabled={!value.trim() || isGenerating}
-              aria-label="Send"
-              className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-opacity disabled:opacity-40 cursor-pointer shadow-xs"
-            >
-              {isGenerating ? (
-                <Loader2 className="size-4 animate-spin" aria-hidden />
-              ) : (
-                <ArrowUp className="size-4" aria-hidden />
-              )}
-            </button>
-          </div>
+        <div className="flex items-center justify-end gap-2 pt-1">
+          <VoicePill />
+          <button
+            type="submit"
+            disabled={!value.trim() || isGenerating}
+            aria-label="Send"
+            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-opacity disabled:opacity-40 cursor-pointer shadow-xs"
+          >
+            {isGenerating ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden />
+            ) : (
+              <ArrowUp className="size-4" aria-hidden />
+            )}
+          </button>
         </div>
       </form>
     </div>
