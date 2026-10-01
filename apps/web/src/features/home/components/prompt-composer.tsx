@@ -132,7 +132,7 @@ export function PromptComposer({
     const textarea = textareaRef.current;
     if (!textarea) return;
     textarea.style.height = "auto";
-    const nextHeight = Math.min(textarea.scrollHeight, 220);
+    const nextHeight = Math.min(Math.max(textarea.scrollHeight, 36), 220);
     textarea.style.height = `${nextHeight}px`;
     textarea.style.overflowY = textarea.scrollHeight > 220 ? "auto" : "hidden";
   }, [value]);
@@ -327,53 +327,51 @@ export function PromptComposer({
 
       <form
         onSubmit={handleSubmit}
-        className="relative flex w-full items-end gap-2 rounded-[28px] border border-border bg-card px-3.5 py-2 sm:px-4 sm:py-2 shadow-sm transition-all focus-within:shadow-md focus-within:border-ring/40"
+        className="flex w-full flex-col rounded-[24px] border border-border bg-card px-4 pt-3 pb-2.5 shadow-sm transition-shadow focus-within:shadow-md"
       >
-        <div className="flex flex-1 min-w-0 flex-col justify-center">
-          {/* Selected Mode Badge */}
-          {activeMode && ActiveIcon ? (
-            <div className="mb-1 flex shrink-0 items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 pl-2.5 pr-1.5 py-0.5 text-xs font-semibold text-primary self-start">
-              <ActiveIcon className="size-3" />
-              <span className="font-mono text-xs">{activeMode.command}</span>
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveMode(null);
-                  textareaRef.current?.focus();
-                }}
-                className="flex size-3.5 items-center justify-center rounded-full hover:bg-primary/20 text-primary/80 hover:text-primary transition-colors cursor-pointer"
-                aria-label="Remove mode"
-              >
-                <X className="size-2.5" />
-              </button>
-            </div>
-          ) : null}
+        {/* Selected Mode Badge */}
+        {activeMode && ActiveIcon ? (
+          <div className="flex shrink-0 items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 pl-2.5 pr-1.5 py-1 text-xs font-semibold text-primary mb-2 self-start">
+            <ActiveIcon className="size-3.5" />
+            <span className="font-mono">{activeMode.command}</span>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveMode(null);
+                textareaRef.current?.focus();
+              }}
+              className="flex size-4 items-center justify-center rounded-full hover:bg-primary/20 text-primary/80 hover:text-primary transition-colors cursor-pointer"
+              aria-label="Remove mode"
+            >
+              <X className="size-2.5" />
+            </button>
+          </div>
+        ) : null}
 
-          {/* Textarea */}
-          <textarea
-            ref={textareaRef}
-            value={value}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            placeholder={
-              activeMode
-                ? `Write your ${activeMode.label.toLowerCase()} note topic or prompt...`
-                : "Ask anything, or type / for shortcuts..."
-            }
-            rows={1}
-            disabled={isGenerating}
-            className="min-w-0 w-full min-h-[32px] max-h-52 resize-none bg-transparent px-1 py-1 text-[0.95rem] leading-6 text-foreground outline-none placeholder:text-muted-foreground/80 disabled:opacity-60"
-          />
-        </div>
+        {/* Full-width Textarea */}
+        <textarea
+          ref={textareaRef}
+          value={value}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+          placeholder={
+            activeMode
+              ? `Write your ${activeMode.label.toLowerCase()} note topic or prompt...`
+              : "Ask anything, or type / for shortcuts..."
+          }
+          rows={1}
+          disabled={isGenerating}
+          className="min-w-0 w-full min-h-[36px] max-h-56 resize-none bg-transparent px-1 text-[0.95rem] leading-6 text-foreground outline-none placeholder:text-muted-foreground/80 disabled:opacity-60"
+        />
 
-        {/* Right Action Buttons */}
-        <div className="flex shrink-0 items-center gap-1.5">
+        {/* Bottom Action Strip (ChatGPT style) */}
+        <div className="flex items-center justify-end gap-2 pt-1">
           <VoicePill />
           <button
             type="submit"
             disabled={!value.trim() || isGenerating}
             aria-label="Send"
-            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-opacity disabled:opacity-40 cursor-pointer shadow-xs hover:opacity-90"
+            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-opacity disabled:opacity-40 cursor-pointer shadow-xs"
           >
             {isGenerating ? (
               <Loader2 className="size-4 animate-spin" aria-hidden />
@@ -386,4 +384,3 @@ export function PromptComposer({
     </div>
   );
 }
-
