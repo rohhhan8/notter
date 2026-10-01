@@ -132,7 +132,7 @@ export function PromptComposer({
     const textarea = textareaRef.current;
     if (!textarea) return;
     textarea.style.height = "auto";
-    const nextHeight = Math.min(Math.max(textarea.scrollHeight, 24), 220);
+    const nextHeight = Math.min(Math.max(textarea.scrollHeight, 28), 220);
     textarea.style.height = `${nextHeight}px`;
     textarea.style.overflowY = textarea.scrollHeight > 220 ? "auto" : "hidden";
   }, [value]);
@@ -327,7 +327,7 @@ export function PromptComposer({
 
       <form
         onSubmit={handleSubmit}
-        className="relative flex w-full items-center gap-2 rounded-[26px] border border-border bg-card px-3.5 py-1.5 sm:px-4 sm:py-2 min-h-[48px] sm:min-h-[50px] shadow-sm transition-all focus-within:shadow-md focus-within:border-ring/40"
+        className="relative flex w-full items-center gap-2 rounded-[28px] border border-border bg-card px-4 py-2 sm:px-5 sm:py-2.5 min-h-[54px] sm:min-h-[58px] shadow-sm transition-all focus-within:shadow-md focus-within:border-ring/40"
       >
         {/* Selected Mode Badge */}
         {activeMode && ActiveIcon ? (
@@ -348,7 +348,7 @@ export function PromptComposer({
           </div>
         ) : null}
 
-        {/* Textarea - Vertically centered text and placeholder */}
+        {/* Textarea - Vertically centered with pt on placeholder/text */}
         <textarea
           ref={textareaRef}
           value={value}
@@ -361,11 +361,11 @@ export function PromptComposer({
           }
           rows={1}
           disabled={isGenerating}
-          className="min-w-0 flex-1 resize-none bg-transparent px-1 py-0.5 text-[0.95rem] leading-6 text-foreground outline-none placeholder:text-muted-foreground/80 placeholder:leading-6 disabled:opacity-60 block"
+          className="min-w-0 flex-1 resize-none bg-transparent px-1 pt-1.5 pb-1 text-[0.95rem] leading-6 text-foreground outline-none placeholder:text-muted-foreground/80 disabled:opacity-60 block"
         />
 
         {/* Action Buttons (Voice & Send) */}
-        <div className="flex shrink-0 items-center gap-1.5 self-end mb-0.5">
+        <div className="flex shrink-0 items-center gap-2 self-center">
           <VoicePill />
           <button
             type="submit"
