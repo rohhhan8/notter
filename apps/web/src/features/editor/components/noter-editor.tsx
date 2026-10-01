@@ -11,7 +11,8 @@ import { cn } from "@/lib/utils";
 
 export interface NoterEditorProps {
   initialDocument?: JSONContent;
-  onSave?: (document: JSONContent) => void;
+  onSave?: (document: JSONContent, title?: string) => void;
+  onTitleChange?: (title: string) => void;
   className?: string;
   title?: string;
   mode?: string;
@@ -20,10 +21,19 @@ export interface NoterEditorProps {
 export function NoterEditor({
   initialDocument = HARDCODED_TEST_DOCUMENT,
   onSave,
+  onTitleChange,
   className,
-  title,
+  title = "Untitled Note",
   mode,
 }: NoterEditorProps) {
+  const [prevTitle, setPrevTitle] = useState(title);
+  const [currentTitle, setCurrentTitle] = useState(title);
+
+  if (title !== prevTitle) {
+    setPrevTitle(title);
+    setCurrentTitle(title);
+  }
+
   // Ensure the document is validated against the controlled schema
   const validatedInitial = useMemo(() => sanitizeDocument(initialDocument), [initialDocument]);
 
@@ -38,9 +48,9 @@ export function NoterEditor({
     ({ editor }: { editor: { getJSON: () => JSONContent } }) => {
       const current = editor.getJSON();
       const equal = areDocumentsEqual(current, savedDocument);
-      setIsDirty(!equal);
+      setIsDirty(!equal || currentTitle !== title);
     },
-    [savedDocument],
+    [savedDocument, currentTitle, title],
   );
 
   const editor = useEditor({
@@ -71,15 +81,14 @@ export function NoterEditor({
     if (!editor) return;
     const currentJson = editor.getJSON();
 
-    // Log / store temporarily as specified in Phase 1
     if (process.env.NODE_ENV !== "production") {
       console.log("[Noter Editor] Document Saved Successfully. Canonical JSON:", currentJson);
     }
 
     setSavedDocument(currentJson);
     setIsDirty(false);
-    onSave?.(currentJson);
-  }, [editor, onSave]);
+    onSave?.(currentJson, currentTitle);
+  }, [editor, onSave, currentTitle]);
 
   return (
     <div
@@ -92,23 +101,28 @@ export function NoterEditor({
       <div className="shrink-0 z-30 bg-card border-b border-border/60">
         <EditorToolbar editor={editor} isDirty={isDirty} onSave={handleSave} />
 
-        {(title || mode) && (
-          <div className="px-6 pt-3.5 pb-3 border-t border-border/40">
-            <div className="flex items-center gap-2 mb-1">
-              {mode && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-[10px] font-mono font-semibold text-primary">
-                  /{mode}
-                </span>
-              )}
-              <span className="text-[11px] text-muted-foreground font-mono">Tiptap Rich-Text Mode</span>
-            </div>
-            {title && (
-              <h1 className="font-heading text-lg sm:text-xl font-bold tracking-tight text-foreground">
-                {title}
-              </h1>
+        <div className="px-6 pt-3.5 pb-3 border-t border-border/40">
+          <div className="flex items-center gap-2 mb-1.5">
+            {mode && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-[10px] font-mono font-semibold text-primary">
+                /{mode}
+              </span>
             )}
+            <span className="text-[11px] text-muted-foreground font-mono">Editable Document</span>
           </div>
-        )}
+          <input
+            type="text"
+            value={currentTitle}
+            onChange={(e) => {
+              const val = e.target.value;
+              setCurrentTitle(val);
+              setIsDirty(true);
+              onTitleChange?.(val);
+            }}
+            placeholder="Untitled Note"
+            className="w-full bg-transparent font-heading text-lg sm:text-xl font-bold tracking-tight text-foreground placeholder:text-muted-foreground/50 focus:outline-none border-b border-transparent hover:border-border/60 focus:border-border transition-colors pb-0.5"
+          />
+        </div>
       </div>
 
       {/* Scrollable Editable Tiptap Document Surface */}

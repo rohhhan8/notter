@@ -1,16 +1,17 @@
 "use client";
 
-import { Menu, PanelLeft, SquarePen } from "lucide-react";
+import { Menu, PanelLeft, SquarePen, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Wordmark } from "@/components/wordmark";
 import { Tooltip } from "@/components/ui/tooltip";
-import type { Note } from "@/features/home/data/mock-notes";
+import type { NoteSummary } from "@notter/types";
 
 interface NotesSidebarProps {
-  notes: Note[];
+  notes: NoteSummary[];
   activeNoteId: string | null;
   onSelectNote: (id: string) => void;
   onNewNote: () => void;
+  onDeleteNote?: (id: string) => void;
   isOpen: boolean;
   onToggle: () => void;
 }
@@ -20,6 +21,7 @@ export function NotesSidebar({
   activeNoteId,
   onSelectNote,
   onNewNote,
+  onDeleteNote,
   isOpen,
   onToggle,
 }: NotesSidebarProps) {
@@ -77,17 +79,32 @@ export function NotesSidebar({
 
           <ul className="flex flex-col gap-0.5">
             {notes.map((note) => (
-              <li key={note.id}>
+              <li key={note.id} className="group relative flex items-center">
                 <button
                   type="button"
                   onClick={() => handleSelectNote(note.id)}
                   className={cn(
-                    "w-full truncate rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer",
-                    activeNoteId === note.id && "bg-sidebar-accent text-sidebar-accent-foreground",
+                    "w-full truncate rounded-lg py-2 pl-3 pr-8 text-left text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer",
+                    activeNoteId === note.id && "bg-sidebar-accent text-sidebar-accent-foreground font-medium",
                   )}
+                  title={note.title}
                 >
                   {note.title}
                 </button>
+                {onDeleteNote ? (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDeleteNote(note.id);
+                    }}
+                    className="absolute right-1.5 hidden size-6 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive group-hover:flex cursor-pointer"
+                    aria-label={`Delete ${note.title}`}
+                    title="Delete note"
+                  >
+                    <Trash2 className="size-3.5" />
+                  </button>
+                ) : null}
               </li>
             ))}
           </ul>

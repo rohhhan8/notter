@@ -1,5 +1,6 @@
 export const CONTROLLED_NODE_TYPES = [
   "doc",
+  "text",
   "paragraph",
   "heading",
   "bulletList",

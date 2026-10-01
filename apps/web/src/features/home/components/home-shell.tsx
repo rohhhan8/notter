@@ -1,48 +1,59 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Settings } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Settings, Loader2 } from "lucide-react";
 import { createOnboardingClient, createProfileClient, createNotesClient } from "@notter/api-client";
-import type { Profile, NoteMode } from "@notter/types";
+import type { Profile, Note, NoteSummary, NoteMode } from "@notter/types";
 import { getApiBaseUrl } from "@/lib/env";
 import { LoadingScreen } from "@/components/loading-screen";
 import { NotesSidebar } from "@/features/home/components/notes-sidebar";
 import { PromptComposer } from "@/features/home/components/prompt-composer";
 import { NoterEditor, HARDCODED_TEST_DOCUMENT } from "@/features/editor";
-import { mockNotes, type Note } from "@/features/home/data/mock-notes";
+import type { JSONContent } from "@tiptap/react";
 import { ProfileModal } from "@/features/profile/components/profile-modal";
 import { toast } from "@/components/ui/toast";
 
-const NOTES_STORAGE_KEY = "notter_user_notes";
-
-function getInitialNotes(): Note[] {
-  if (typeof window === "undefined") return mockNotes;
-  try {
-    const saved = localStorage.getItem(NOTES_STORAGE_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-    }
-  } catch {
-    // fallback
-  }
-  return mockNotes;
-}
-
 export function HomeShell() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const urlNoteId = searchParams.get("noteId");
+
   const [profile, setProfile] = useState<Profile | null | undefined>(undefined);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [notes, setNotes] = useState<Note[]>(getInitialNotes);
-  const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
+  const [notes, setNotes] = useState<NoteSummary[]>([]);
+  const [activeNoteId, setActiveNoteId] = useState<string | null>(() => urlNoteId);
+  const [activeNote, setActiveNote] = useState<Note | null>(null);
+  const [prevUrlNoteId, setPrevUrlNoteId] = useState<string | null>(urlNoteId);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => typeof window !== "undefined" && window.innerWidth >= 768);
+
+  // Derived loading state: true when an activeNoteId is selected but its full content is not yet loaded
+  const isLoadingNote = Boolean(activeNoteId && (!activeNote || activeNote.id !== activeNoteId));
+
+  // React 19: Adjust state during render when URL search param changes
+  if (urlNoteId !== prevUrlNoteId) {
+    setPrevUrlNoteId(urlNoteId);
+    setActiveNoteId(urlNoteId);
+    if (!urlNoteId) {
+      setActiveNote(null);
+    }
+  }
+
+  const fetchNotes = useCallback(async () => {
+    try {
+      const client = createNotesClient({ baseUrl: getApiBaseUrl() });
+      const userNotes = await client.list();
+      setNotes(userNotes);
+    } catch (err) {
+      console.warn("Could not fetch remote notes:", err);
+    }
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
 
-    async function loadProfile() {
+    async function loadProfileAndNotes() {
       const onboardingClient = createOnboardingClient({ baseUrl: getApiBaseUrl() });
       const session = await onboardingClient.getSession();
 
@@ -63,22 +74,48 @@ export function HomeShell() {
       }
 
       setProfile(result);
+      await fetchNotes();
     }
 
-    loadProfile();
+    loadProfileAndNotes();
 
     return () => {
       cancelled = true;
     };
-  }, [router]);
+  }, [router, fetchNotes]);
 
+  // Dedicated GET by ID effect: when activeNoteId changes, fetch complete note content
   useEffect(() => {
-    try {
-      localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(notes));
-    } catch {
-      // ignore
+    if (!activeNoteId) return;
+
+    // If active note is already populated for this ID, avoid duplicate fetch
+    if (activeNote && activeNote.id === activeNoteId && activeNote.document) {
+      return;
     }
-  }, [notes]);
+
+    let cancelled = false;
+
+    async function loadNoteById() {
+      try {
+        const client = createNotesClient({ baseUrl: getApiBaseUrl() });
+        const fetched = await client.get(activeNoteId!);
+        if (!cancelled) {
+          setActiveNote(fetched);
+        }
+      } catch (error) {
+        console.error(`Failed to fetch note ${activeNoteId}:`, error);
+        if (!cancelled) {
+          toast.error("Failed to load note content");
+        }
+      }
+    }
+
+    loadNoteById();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeNoteId, activeNote]);
 
   async function handleSignOut() {
     const client = createOnboardingClient({ baseUrl: getApiBaseUrl() });
@@ -86,61 +123,113 @@ export function HomeShell() {
     router.push("/onboarding");
   }
 
+  // ChatGPT pattern: New note merely resets to the empty prompt screen, NO database insert
   function handleNewNote() {
     setActiveNoteId(null);
+    setActiveNote(null);
+    router.push("/home");
+  }
+
+  function handleSelectNote(id: string) {
+    setActiveNoteId(id);
+    router.push(`/home?noteId=${encodeURIComponent(id)}`);
+  }
+
+  async function handleDeleteNote(id: string) {
+    try {
+      const client = createNotesClient({ baseUrl: getApiBaseUrl() });
+      await client.delete(id);
+      setNotes((prev) => prev.filter((n) => n.id !== id));
+      if (activeNoteId === id) {
+        setActiveNoteId(null);
+        setActiveNote(null);
+        router.push("/home");
+      }
+      toast.success("Note deleted");
+    } catch (error) {
+      console.error("Failed to delete note:", error);
+      toast.error("Failed to delete note");
+    }
+  }
+
+  async function handleSaveDocument(savedDoc: Record<string, unknown>, newTitle?: string) {
+    if (!activeNoteId) return;
+    try {
+      const client = createNotesClient({ baseUrl: getApiBaseUrl() });
+      const updated = await client.update(activeNoteId, {
+        document: savedDoc,
+        ...(newTitle ? { title: newTitle.trim() } : {}),
+      });
+
+      setActiveNote(updated);
+      setNotes((prev) =>
+        prev.map((n) =>
+          n.id === activeNoteId
+            ? { ...n, title: updated.title, updatedAt: updated.updatedAt }
+            : n
+        )
+      );
+      toast.success("Document saved successfully");
+    } catch (error) {
+      console.error("Failed to save note document:", error);
+      toast.error("Failed to save document");
+    }
   }
 
   async function handlePromptSubmit(prompt: string, mode?: NoteMode) {
     setIsGenerating(true);
-    const newId = crypto.randomUUID();
-    const initialTitle = prompt.length > 50 ? `${prompt.slice(0, 50)}…` : prompt;
-
-    const newNote: Note = {
-      id: newId,
-      title: initialTitle,
-      content: "",
-      createdAt: new Date().toISOString(),
-      mode,
-    };
-
-    setNotes((current) => [newNote, ...current]);
-    setActiveNoteId(newId);
 
     try {
       const client = createNotesClient({ baseUrl: getApiBaseUrl() });
-      let accumulated = "";
 
-      await client.generateStream({
-        prompt,
-        intent: profile?.intent,
-        mode,
-        onDelta: (delta) => {
-          accumulated += delta;
+      // Plain CRUD note creation: split input text into clean Tiptap paragraphs
+      const lines = prompt
+        .split("\n")
+        .map((l) => l.trim())
+        .filter((l) => l.length > 0);
 
-          // Check if markdown title has streamed in (e.g. # Some Title)
-          let dynamicTitle = initialTitle;
-          const match = accumulated.match(/^#\s+([^\n]+)/);
-          if (match && match[1]) {
-            dynamicTitle = match[1].trim();
-          }
+      const title = lines[0]
+        ? lines[0].length > 40
+          ? `${lines[0].slice(0, 40)}…`
+          : lines[0]
+        : "Untitled Note";
 
-          setNotes((current) =>
-            current.map((n) =>
-              n.id === newId
-                ? {
-                    ...n,
-                    title: dynamicTitle,
-                    content: accumulated,
-                  }
-                : n
-            )
-          );
-        },
+      const contentNodes =
+        lines.length > 0
+          ? lines.map((line) => ({
+              type: "paragraph" as const,
+              content: [{ type: "text" as const, text: line }],
+            }))
+          : [{ type: "paragraph" as const }];
+
+      const document = {
+        type: "doc",
+        content: contentNodes,
+      };
+
+      const created = await client.create({
+        title,
+        document,
+        mode: mode || "general",
       });
-      toast.success("Note created successfully");
+
+      if (created) {
+        const summary: NoteSummary = {
+          id: created.id,
+          title: created.title,
+          mode: created.mode,
+          createdAt: created.createdAt,
+          updatedAt: created.updatedAt,
+        };
+        setNotes((prev) => [summary, ...prev.filter((n) => n.id !== created.id)]);
+        setActiveNote(created);
+        setActiveNoteId(created.id);
+        router.push(`/home?noteId=${encodeURIComponent(created.id)}`);
+        toast.success("Note created successfully");
+      }
     } catch (error) {
-      console.error("Failed to generate note:", error);
-      toast.error("Failed to generate note", "Please check your network and try again.");
+      console.error("Failed to create note:", error);
+      toast.error("Failed to create note", error instanceof Error ? error.message : "Please try again.");
     } finally {
       setIsGenerating(false);
     }
@@ -150,15 +239,14 @@ export function HomeShell() {
     return <LoadingScreen />;
   }
 
-  const activeNote = notes.find((note) => note.id === activeNoteId) ?? null;
-
   return (
     <div className="flex h-dvh overflow-hidden bg-background">
       <NotesSidebar
         notes={notes}
         activeNoteId={activeNoteId}
-        onSelectNote={setActiveNoteId}
+        onSelectNote={handleSelectNote}
         onNewNote={handleNewNote}
+        onDeleteNote={handleDeleteNote}
         isOpen={isSidebarOpen}
         onToggle={() => setIsSidebarOpen((open) => !open)}
       />
@@ -185,34 +273,38 @@ export function HomeShell() {
           </button>
         </header>
 
-        {activeNote ? (
-          <>
+        {activeNoteId ? (
+          isLoadingNote || !activeNote ? (
             <main className="flex-1 min-h-0 flex flex-col px-4 sm:px-6 pt-0 pb-3 overflow-hidden">
-              <div className="mx-auto max-w-3xl w-full flex-1 min-h-0 flex flex-col">
-                <NoterEditor
-                  key={activeNote.id}
-                  initialDocument={HARDCODED_TEST_DOCUMENT}
-                  title={activeNote.title}
-                  mode={activeNote.mode}
-                  className="flex-1 min-h-0"
-                  onSave={(savedDoc) => {
-                    toast.success("Document saved successfully!");
-                    if (process.env.NODE_ENV !== "production") {
-                      console.log("[Noter HomeShell] Saved canonical JSON document:", savedDoc);
-                    }
-                  }}
-                />
+              <div className="mx-auto max-w-3xl w-full flex-1 min-h-0 flex flex-col rounded-2xl border border-border bg-card p-8 items-center justify-center gap-3">
+                <Loader2 className="size-6 animate-spin text-primary" />
+                <p className="text-xs font-mono text-muted-foreground">Loading note content...</p>
               </div>
             </main>
-            <div className="px-6 pb-[max(env(safe-area-inset-bottom),24px)]">
-              <PromptComposer
-                onSubmit={handlePromptSubmit}
-                isGenerating={isGenerating}
-                className="mx-auto max-w-2xl"
-                dropdownPosition="top"
-              />
-            </div>
-          </>
+          ) : (
+            <>
+              <main className="flex-1 min-h-0 flex flex-col px-4 sm:px-6 pt-0 pb-3 overflow-hidden">
+                <div className="mx-auto max-w-3xl w-full flex-1 min-h-0 flex flex-col">
+                  <NoterEditor
+                    key={activeNote.id}
+                    initialDocument={(activeNote.document as JSONContent) ?? HARDCODED_TEST_DOCUMENT}
+                    title={activeNote.title}
+                    mode={activeNote.mode}
+                    className="flex-1 min-h-0"
+                    onSave={handleSaveDocument}
+                  />
+                </div>
+              </main>
+              <div className="px-6 pb-[max(env(safe-area-inset-bottom),24px)]">
+                <PromptComposer
+                  onSubmit={handlePromptSubmit}
+                  isGenerating={isGenerating}
+                  className="mx-auto max-w-2xl"
+                  dropdownPosition="top"
+                />
+              </div>
+            </>
+          )
         ) : (
           <main className="flex flex-1 flex-col items-center justify-center gap-6 px-6 text-center">
             <div className="flex flex-col gap-1">

@@ -21,6 +21,22 @@ export function sanitizeDocument(doc: JSONContent | null | undefined): JSONConte
       return { type: "paragraph", content: [{ type: "text", text: "" }] };
     }
 
+    if (node.type === "text") {
+      const textNode: JSONContent = {
+        type: "text",
+        text: String(node.text ?? ""),
+      };
+      if (Array.isArray(node.marks)) {
+        textNode.marks = node.marks
+          .filter((mark) => mark && mark.type && VALID_MARKS.has(mark.type))
+          .map((mark) => ({
+            type: mark.type,
+            ...(mark.attrs ? { attrs: { ...mark.attrs } } : {}),
+          }));
+      }
+      return textNode;
+    }
+
     const type = node.type || "paragraph";
     const isKnownNode = VALID_NODES.has(type);
 
@@ -33,10 +49,6 @@ export function sanitizeDocument(doc: JSONContent | null | undefined): JSONConte
     const sanitized: JSONContent = {
       type: safeType,
     };
-
-    if (node.text !== undefined) {
-      sanitized.text = String(node.text);
-    }
 
     if (node.attrs && typeof node.attrs === "object") {
       sanitized.attrs = { ...node.attrs };
