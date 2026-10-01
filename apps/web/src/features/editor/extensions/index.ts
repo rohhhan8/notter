@@ -31,8 +31,9 @@ export function createEditorExtensions() {
     }),
     CodeBlockLowlight.configure({
       lowlight,
+      defaultLanguage: "javascript",
       HTMLAttributes: {
-        class: "my-4 rounded-xl border border-border/70 bg-neutral-900 text-neutral-100 p-4 font-mono text-xs overflow-x-auto",
+        class: "my-4 rounded-xl border border-border/70 bg-neutral-950 text-slate-100 p-4 font-mono text-xs overflow-x-auto",
       },
     }),
     TaskList.configure({

@@ -203,59 +203,94 @@ ul[data-type="taskList"] li[data-type="taskItem"][data-checked="true"] > div > p
   color: var(--muted-foreground);
 }
 
-/* Code Syntax Highlighting (Lowlight / Highlight.js) */
-pre code.hljs {
-  display: block;
-  overflow-x: auto;
-  padding: 0;
-  background: transparent;
-  color: #e6edf3;
+/* Code Block Styles & Syntax Highlighting */
+pre,
+pre code {
+  color: #e2e8f0 !important;
+  font-family: var(--font-mono), ui-monospace, monospace;
 }
 
+pre {
+  background-color: #0d1117 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 0.75rem !important;
+  padding: 1rem 1.25rem !important;
+  margin: 1rem 0 !important;
+  overflow-x: auto;
+  tab-size: 2;
+}
+
+pre code {
+  background: transparent !important;
+  padding: 0 !important;
+  font-size: 0.8125rem !important;
+  line-height: 1.65 !important;
+}
+
+/* Crisp high-contrast selection inside dark code blocks */
+pre ::selection,
+pre *::selection,
+pre::selection {
+  background-color: #1f6feb !important;
+  color: #ffffff !important;
+}
+
+/* Vibrant VS Code / GitHub Dark syntax tokens */
 .hljs-comment,
+.hljs-quote,
 .hljs-punctuation {
-  color: #8b949e;
+  color: #8b949e !important;
   font-style: italic;
 }
 
-.hljs-tag,
-.hljs-attribute,
 .hljs-keyword,
-.hljs-selector-tag {
-  color: #ff7b72;
+.hljs-selector-tag,
+.hljs-subst {
+  color: #ff7b72 !important;
   font-weight: 600;
 }
 
 .hljs-string,
-.hljs-doctag {
-  color: #a5d6ff;
+.hljs-doctag,
+.hljs-regexp {
+  color: #a5d6ff !important;
 }
 
 .hljs-title,
 .hljs-section,
-.hljs-selector-id {
-  color: #d2a8ff;
+.hljs-selector-id,
+.hljs-title.function_,
+.hljs-title.class_ {
+  color: #d2a8ff !important;
   font-weight: 600;
 }
 
 .hljs-type,
 .hljs-class .hljs-title {
-  color: #ffa657;
+  color: #ffa657 !important;
 }
 
 .hljs-number,
-.hljs-literal {
-  color: #79c0ff;
+.hljs-literal,
+.hljs-symbol,
+.hljs-bullet {
+  color: #79c0ff !important;
 }
 
 .hljs-variable,
-.hljs-template-variable {
-  color: #ffa657;
+.hljs-template-variable,
+.hljs-params,
+.hljs-attr {
+  color: #ffa657 !important;
 }
 
 .hljs-built_in,
 .hljs-builtin-name {
-  color: #7ee787;
+  color: #7ee787 !important;
+}
+
+.hljs-meta {
+  color: #79c0ff !important;
 }
 
 /* Tables */
