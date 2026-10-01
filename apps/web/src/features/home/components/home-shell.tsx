@@ -8,8 +8,8 @@ import type { Profile, NoteMode } from "@notter/types";
 import { getApiBaseUrl } from "@/lib/env";
 import { LoadingScreen } from "@/components/loading-screen";
 import { NotesSidebar } from "@/features/home/components/notes-sidebar";
-import { NoteView } from "@/features/home/components/note-view";
 import { PromptComposer } from "@/features/home/components/prompt-composer";
+import { NoterEditor, HARDCODED_TEST_DOCUMENT } from "@/features/editor";
 import { mockNotes, type Note } from "@/features/home/data/mock-notes";
 import { ProfileModal } from "@/features/profile/components/profile-modal";
 import { toast } from "@/components/ui/toast";
@@ -187,8 +187,21 @@ export function HomeShell() {
 
         {activeNote ? (
           <>
-            <main className="flex-1 overflow-y-auto px-6 py-8">
-              <NoteView note={activeNote} isStreaming={isGenerating && activeNoteId === activeNote.id} />
+            <main className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6">
+              <div className="mx-auto max-w-3xl w-full">
+                <NoterEditor
+                  key={activeNote.id}
+                  initialDocument={HARDCODED_TEST_DOCUMENT}
+                  title={activeNote.title}
+                  mode={activeNote.mode}
+                  onSave={(savedDoc) => {
+                    toast.success("Document saved successfully!");
+                    if (process.env.NODE_ENV !== "production") {
+                      console.log("[Noter HomeShell] Saved canonical JSON document:", savedDoc);
+                    }
+                  }}
+                />
+              </div>
             </main>
             <div className="px-6 pb-[max(env(safe-area-inset-bottom),24px)]">
               <PromptComposer

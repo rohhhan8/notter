@@ -146,3 +146,139 @@
   height: 0.375rem;
   animation: voice-bar 900ms ease-in-out infinite;
 }
+
+/* ==================================================
+   Tiptap Rich-Text Editor System Styles
+   ================================================== */
+
+/* Task Items / Interactive Checkboxes */
+ul[data-type="taskList"] {
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem 0;
+}
+
+ul[data-type="taskList"] li[data-type="taskItem"] {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  margin: 0.375rem 0;
+}
+
+ul[data-type="taskList"] li[data-type="taskItem"] > label {
+  user-select: none;
+  margin-top: 0.2rem;
+  cursor: pointer;
+}
+
+ul[data-type="taskList"] li[data-type="taskItem"] > label input[type="checkbox"] {
+  appearance: none;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 0.25rem;
+  border: 1.5px solid var(--border);
+  background-color: var(--card);
+  cursor: pointer;
+  display: grid;
+  place-content: center;
+  transition: all 150ms ease-in-out;
+}
+
+ul[data-type="taskList"] li[data-type="taskItem"] > label input[type="checkbox"]:checked {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+ul[data-type="taskList"] li[data-type="taskItem"] > label input[type="checkbox"]:checked::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.25rem;
+  border-left: 2px solid var(--primary-foreground);
+  border-bottom: 2px solid var(--primary-foreground);
+  transform: rotate(-45deg) translate(1px, -1px);
+}
+
+ul[data-type="taskList"] li[data-type="taskItem"][data-checked="true"] > div > p {
+  text-decoration: line-through;
+  color: var(--muted-foreground);
+}
+
+/* Code Syntax Highlighting (Lowlight / Highlight.js) */
+pre code.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 0;
+  background: transparent;
+  color: #e6edf3;
+}
+
+.hljs-comment,
+.hljs-punctuation {
+  color: #8b949e;
+  font-style: italic;
+}
+
+.hljs-tag,
+.hljs-attribute,
+.hljs-keyword,
+.hljs-selector-tag {
+  color: #ff7b72;
+  font-weight: 600;
+}
+
+.hljs-string,
+.hljs-doctag {
+  color: #a5d6ff;
+}
+
+.hljs-title,
+.hljs-section,
+.hljs-selector-id {
+  color: #d2a8ff;
+  font-weight: 600;
+}
+
+.hljs-type,
+.hljs-class .hljs-title {
+  color: #ffa657;
+}
+
+.hljs-number,
+.hljs-literal {
+  color: #79c0ff;
+}
+
+.hljs-variable,
+.hljs-template-variable {
+  color: #ffa657;
+}
+
+.hljs-built_in,
+.hljs-builtin-name {
+  color: #7ee787;
+}
+
+/* Tables */
+.noter-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+.noter-table th,
+.noter-table td {
+  min-width: 100px;
+  position: relative;
+}
+
+.noter-table .selectedCell:after {
+  z-index: 2;
+  position: absolute;
+  content: "";
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(200, 200, 255, 0.4);
+  pointer-events: none;
+}

@@ -8,6 +8,14 @@ export interface Note {
 
 export const mockNotes: Note[] = [
   {
+    id: "tiptap-v1-test",
+    title: "React 19 & Next.js Architecture Notes",
+    content:
+      "Comprehensive V1 Tiptap rich-text editor test suite exercising all supported block nodes, marks, and interactive elements.",
+    createdAt: "2026-10-01T10:00:00.000Z",
+    mode: "technical",
+  },
+  {
     id: "1",
     title: "Weekly team sync notes",
     content:
