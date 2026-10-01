@@ -12,6 +12,7 @@ import {
   ArrowUp,
   Loader2,
   X,
+  Plus,
   Sparkles,
   School,
   Presentation,
@@ -132,7 +133,7 @@ export function PromptComposer({
     const textarea = textareaRef.current;
     if (!textarea) return;
     textarea.style.height = "auto";
-    const nextHeight = Math.min(Math.max(textarea.scrollHeight, 28), 220);
+    const nextHeight = Math.min(Math.max(textarea.scrollHeight, 44), 220);
     textarea.style.height = `${nextHeight}px`;
     textarea.style.overflowY = textarea.scrollHeight > 220 ? "auto" : "hidden";
   }, [value]);
@@ -327,28 +328,9 @@ export function PromptComposer({
 
       <form
         onSubmit={handleSubmit}
-        className="relative flex w-full items-center gap-2 rounded-[28px] border border-border bg-card px-4 py-2 sm:px-5 sm:py-2.5 min-h-[54px] sm:min-h-[58px] shadow-sm transition-all focus-within:shadow-md focus-within:border-ring/40"
+        className="relative flex w-full flex-col rounded-[22px] sm:rounded-[26px] border border-border bg-card p-2.5 sm:p-3 shadow-xs transition-all focus-within:shadow-md focus-within:border-ring/50"
       >
-        {/* Selected Mode Badge */}
-        {activeMode && ActiveIcon ? (
-          <div className="flex shrink-0 items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 pl-2.5 pr-1.5 py-0.5 text-xs font-semibold text-primary select-none">
-            <ActiveIcon className="size-3.5" />
-            <span className="font-mono text-xs">{activeMode.command}</span>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveMode(null);
-                textareaRef.current?.focus();
-              }}
-              className="flex size-3.5 items-center justify-center rounded-full hover:bg-primary/20 text-primary/80 hover:text-primary transition-colors cursor-pointer"
-              aria-label="Remove mode"
-            >
-              <X className="size-2.5" />
-            </button>
-          </div>
-        ) : null}
-
-        {/* Textarea - Vertically centered with pt on placeholder/text */}
+        {/* Top/Main: Textarea */}
         <textarea
           ref={textareaRef}
           value={value}
@@ -361,24 +343,66 @@ export function PromptComposer({
           }
           rows={1}
           disabled={isGenerating}
-          className="min-w-0 flex-1 resize-none bg-transparent px-1 pt-1.5 pb-1 text-[0.95rem] leading-6 text-foreground outline-none placeholder:text-muted-foreground/80 disabled:opacity-60 block"
+          className="w-full resize-none bg-transparent px-2 pt-1 pb-1 text-[0.95rem] leading-6 text-foreground outline-none placeholder:text-muted-foreground/80 disabled:opacity-60 block min-h-[44px]"
         />
 
-        {/* Action Buttons (Voice & Send) */}
-        <div className="flex shrink-0 items-center gap-2 self-center">
-          <VoicePill />
-          <button
-            type="submit"
-            disabled={!value.trim() || isGenerating}
-            aria-label="Send"
-            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-opacity disabled:opacity-40 cursor-pointer shadow-xs hover:opacity-90"
-          >
-            {isGenerating ? (
-              <Loader2 className="size-4 animate-spin" aria-hidden />
-            ) : (
-              <ArrowUp className="size-4" aria-hidden />
-            )}
-          </button>
+        {/* Bottom Action Strip (ChatGPT / Claude style) */}
+        <div className="flex items-center justify-between gap-2 pt-1.5 px-0.5">
+          {/* Left: '+' button for formats/shortcuts & Active Mode Pill */}
+          <div className="flex items-center gap-1.5 min-w-0">
+            <button
+              type="button"
+              onClick={() => {
+                setIsMenuOpen((prev) => !prev);
+                if (!isMenuOpen) {
+                  textareaRef.current?.focus();
+                }
+              }}
+              aria-label="Choose note mode or shortcut (/)"
+              title="Note formats & shortcuts (/)"
+              className={cn(
+                "flex size-8 shrink-0 items-center justify-center rounded-full border border-border/80 bg-background text-foreground/80 hover:bg-muted hover:text-foreground transition-all cursor-pointer shadow-2xs active:scale-95",
+                isMenuOpen && "bg-muted text-foreground border-primary/40",
+              )}
+            >
+              <Plus className="size-4" />
+            </button>
+
+            {activeMode && ActiveIcon ? (
+              <div className="flex shrink-0 items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 pl-2.5 pr-1.5 py-0.5 text-xs font-semibold text-primary select-none animate-in fade-in">
+                <ActiveIcon className="size-3.5" />
+                <span className="font-mono text-xs">{activeMode.command}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveMode(null);
+                    textareaRef.current?.focus();
+                  }}
+                  className="flex size-3.5 items-center justify-center rounded-full hover:bg-primary/20 text-primary/80 hover:text-primary transition-colors cursor-pointer"
+                  aria-label="Remove mode"
+                >
+                  <X className="size-2.5" />
+                </button>
+              </div>
+            ) : null}
+          </div>
+
+          {/* Right: Voice Input + Send Action */}
+          <div className="flex shrink-0 items-center gap-1.5">
+            <VoicePill />
+            <button
+              type="submit"
+              disabled={!value.trim() || isGenerating}
+              aria-label="Send"
+              className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer shadow-xs hover:opacity-90 active:scale-95"
+            >
+              {isGenerating ? (
+                <Loader2 className="size-4 animate-spin" aria-hidden />
+              ) : (
+                <ArrowUp className="size-4" aria-hidden />
+              )}
+            </button>
+          </div>
         </div>
       </form>
     </div>
