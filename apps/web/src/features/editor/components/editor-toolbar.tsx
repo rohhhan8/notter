@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import type { Editor } from "@tiptap/react";
 import {
   Bold,
@@ -30,6 +31,25 @@ interface EditorToolbarProps {
 }
 
 export function EditorToolbar({ editor, isDirty, onSave }: EditorToolbarProps) {
+  // Sync state on cursor movement and text selection
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    if (!editor) return;
+
+    const handleSync = () => {
+      setTick((prev) => prev + 1);
+    };
+
+    editor.on("selectionUpdate", handleSync);
+    editor.on("transaction", handleSync);
+
+    return () => {
+      editor.off("selectionUpdate", handleSync);
+      editor.off("transaction", handleSync);
+    };
+  }, [editor]);
+
   if (!editor) return null;
 
   return (

@@ -29,7 +29,7 @@ export function ToolbarButton({
       className={cn(
         "inline-flex h-8 min-w-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs font-medium transition-colors cursor-pointer disabled:pointer-events-none disabled:opacity-40",
         isActive
-          ? "bg-primary/15 text-primary font-semibold"
+          ? "bg-primary text-primary-foreground font-semibold shadow-2xs hover:opacity-90"
           : "text-muted-foreground hover:bg-muted hover:text-foreground",
         className,
       )}
