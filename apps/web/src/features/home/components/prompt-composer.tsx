@@ -132,7 +132,7 @@ export function PromptComposer({
     const textarea = textareaRef.current;
     if (!textarea) return;
     textarea.style.height = "auto";
-    const nextHeight = Math.min(Math.max(textarea.scrollHeight, 36), 220);
+    const nextHeight = Math.min(Math.max(textarea.scrollHeight, 24), 220);
     textarea.style.height = `${nextHeight}px`;
     textarea.style.overflowY = textarea.scrollHeight > 220 ? "auto" : "hidden";
   }, [value]);
@@ -327,20 +327,20 @@ export function PromptComposer({
 
       <form
         onSubmit={handleSubmit}
-        className="flex w-full flex-col rounded-[24px] border border-border bg-card px-4 pt-3 pb-2.5 shadow-sm transition-shadow focus-within:shadow-md"
+        className="relative flex w-full items-center gap-2 rounded-[26px] border border-border bg-card px-3.5 py-1.5 sm:px-4 sm:py-2 min-h-[48px] sm:min-h-[50px] shadow-sm transition-all focus-within:shadow-md focus-within:border-ring/40"
       >
         {/* Selected Mode Badge */}
         {activeMode && ActiveIcon ? (
-          <div className="flex shrink-0 items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 pl-2.5 pr-1.5 py-1 text-xs font-semibold text-primary mb-2 self-start">
+          <div className="flex shrink-0 items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 pl-2.5 pr-1.5 py-0.5 text-xs font-semibold text-primary select-none">
             <ActiveIcon className="size-3.5" />
-            <span className="font-mono">{activeMode.command}</span>
+            <span className="font-mono text-xs">{activeMode.command}</span>
             <button
               type="button"
               onClick={() => {
                 setActiveMode(null);
                 textareaRef.current?.focus();
               }}
-              className="flex size-4 items-center justify-center rounded-full hover:bg-primary/20 text-primary/80 hover:text-primary transition-colors cursor-pointer"
+              className="flex size-3.5 items-center justify-center rounded-full hover:bg-primary/20 text-primary/80 hover:text-primary transition-colors cursor-pointer"
               aria-label="Remove mode"
             >
               <X className="size-2.5" />
@@ -348,7 +348,7 @@ export function PromptComposer({
           </div>
         ) : null}
 
-        {/* Full-width Textarea */}
+        {/* Textarea - Vertically centered text and placeholder */}
         <textarea
           ref={textareaRef}
           value={value}
@@ -361,17 +361,17 @@ export function PromptComposer({
           }
           rows={1}
           disabled={isGenerating}
-          className="min-w-0 w-full min-h-[36px] max-h-56 resize-none bg-transparent px-1 text-[0.95rem] leading-6 text-foreground outline-none placeholder:text-muted-foreground/80 disabled:opacity-60"
+          className="min-w-0 flex-1 resize-none bg-transparent px-1 py-0.5 text-[0.95rem] leading-6 text-foreground outline-none placeholder:text-muted-foreground/80 placeholder:leading-6 disabled:opacity-60 block"
         />
 
-        {/* Bottom Action Strip (ChatGPT style) */}
-        <div className="flex items-center justify-end gap-2 pt-1">
+        {/* Action Buttons (Voice & Send) */}
+        <div className="flex shrink-0 items-center gap-1.5 self-end mb-0.5">
           <VoicePill />
           <button
             type="submit"
             disabled={!value.trim() || isGenerating}
             aria-label="Send"
-            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-opacity disabled:opacity-40 cursor-pointer shadow-xs"
+            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-opacity disabled:opacity-40 cursor-pointer shadow-xs hover:opacity-90"
           >
             {isGenerating ? (
               <Loader2 className="size-4 animate-spin" aria-hidden />
