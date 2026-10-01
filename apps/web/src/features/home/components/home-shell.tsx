@@ -187,13 +187,14 @@ export function HomeShell() {
 
         {activeNote ? (
           <>
-            <main className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6">
-              <div className="mx-auto max-w-3xl w-full">
+            <main className="flex-1 min-h-0 flex flex-col px-4 sm:px-6 pt-0 pb-3 overflow-hidden">
+              <div className="mx-auto max-w-3xl w-full flex-1 min-h-0 flex flex-col">
                 <NoterEditor
                   key={activeNote.id}
                   initialDocument={HARDCODED_TEST_DOCUMENT}
                   title={activeNote.title}
                   mode={activeNote.mode}
+                  className="flex-1 min-h-0"
                   onSave={(savedDoc) => {
                     toast.success("Document saved successfully!");
                     if (process.env.NODE_ENV !== "production") {

@@ -84,34 +84,38 @@ export function NoterEditor({
   return (
     <div
       className={cn(
-        "relative flex flex-col w-full rounded-2xl border border-border bg-card shadow-xs overflow-hidden",
+        "relative flex flex-col w-full h-full max-h-full rounded-2xl border border-border bg-card shadow-xs overflow-hidden",
         className,
       )}
     >
-      {/* Editor Toolbar with Active State and Save Button */}
-      <EditorToolbar editor={editor} isDirty={isDirty} onSave={handleSave} />
+      {/* Pinned Top Area: Toolbar + Note Header (Never scrolls) */}
+      <div className="shrink-0 z-30 bg-card border-b border-border/60">
+        <EditorToolbar editor={editor} isDirty={isDirty} onSave={handleSave} />
 
-      {/* Note Header / Meta display */}
-      {(title || mode) && (
-        <div className="border-b border-border/40 px-6 pt-5 pb-3">
-          <div className="flex items-center gap-2 mb-1.5">
-            {mode && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-[10px] font-mono font-semibold text-primary">
-                /{mode}
-              </span>
+        {(title || mode) && (
+          <div className="px-6 pt-3.5 pb-3 border-t border-border/40">
+            <div className="flex items-center gap-2 mb-1">
+              {mode && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-[10px] font-mono font-semibold text-primary">
+                  /{mode}
+                </span>
+              )}
+              <span className="text-[11px] text-muted-foreground font-mono">Tiptap Rich-Text Mode</span>
+            </div>
+            {title && (
+              <h1 className="font-heading text-lg sm:text-xl font-bold tracking-tight text-foreground">
+                {title}
+              </h1>
             )}
-            <span className="text-[11px] text-muted-foreground font-mono">Tiptap Rich-Text Mode</span>
           </div>
-          {title && (
-            <h1 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-              {title}
-            </h1>
-          )}
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* Editable Tiptap Document Surface */}
-      <div className="flex-1 overflow-y-auto bg-card cursor-text" onClick={() => editor?.commands.focus()}>
+      {/* Scrollable Editable Tiptap Document Surface */}
+      <div
+        className="flex-1 min-h-0 overflow-y-auto bg-card cursor-text px-1"
+        onClick={() => editor?.commands.focus()}
+      >
         <EditorContent editor={editor} />
       </div>
     </div>
