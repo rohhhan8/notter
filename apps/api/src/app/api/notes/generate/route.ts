@@ -1,3 +1,4 @@
+import { generateStructuredNote } from "@/features/notes/generation-service";
 import { generateNoteStream } from "@/features/notes/service";
 import type { GenerateNoteRequest } from "@notter/types";
 
@@ -18,6 +19,9 @@ export async function OPTIONS() {
 
 export async function POST(request: Request) {
   try {
+    const url = new URL(request.url);
+    const isStream = url.searchParams.get("stream") === "true";
+
     const body = (await request.json()) as GenerateNoteRequest;
     if (!body?.prompt || typeof body.prompt !== "string" || !body.prompt.trim()) {
       return Response.json(
@@ -26,23 +30,37 @@ export async function POST(request: Request) {
       );
     }
 
-    const stream = await generateNoteStream({
+    if (isStream) {
+      const stream = await generateNoteStream({
+        prompt: body.prompt.trim(),
+        intent: body.intent,
+        mode: body.mode,
+      });
+
+      return new Response(stream, {
+        headers: {
+          "Content-Type": "text/plain; charset=utf-8",
+          "Cache-Control": "no-cache, no-transform",
+          Connection: "keep-alive",
+          ...corsHeaders,
+        },
+      });
+    }
+
+    const result = await generateStructuredNote({
       prompt: body.prompt.trim(),
       intent: body.intent,
       mode: body.mode,
     });
 
-    return new Response(stream, {
-      headers: {
-        "Content-Type": "text/plain; charset=utf-8",
-        "Cache-Control": "no-cache, no-transform",
-        "Connection": "keep-alive",
-        ...corsHeaders,
-      },
+    return Response.json(result, {
+      status: 201,
+      headers: corsHeaders,
     });
   } catch (error) {
-    console.error("Error generating note via Groq:", error);
+    console.error("Error generating note:", error);
     const message = error instanceof Error ? error.message : "Failed to generate note";
-    return Response.json({ error: message }, { status: 500, headers: corsHeaders });
+    const status = message.includes("Not authenticated") ? 401 : 500;
+    return Response.json({ error: message }, { status, headers: corsHeaders });
   }
 }
