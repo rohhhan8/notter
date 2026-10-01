@@ -327,11 +327,11 @@ export function PromptComposer({
 
       <form
         onSubmit={handleSubmit}
-        className="flex w-full items-end gap-2 rounded-3xl border border-border bg-card px-4 sm:px-5 py-3.5 sm:py-4 shadow-sm transition-shadow focus-within:shadow-md"
+        className="flex w-full flex-col rounded-3xl border border-border bg-card p-3.5 sm:p-4 shadow-sm transition-shadow focus-within:shadow-md"
       >
         {/* Selected Mode Badge */}
         {activeMode && ActiveIcon ? (
-          <div className="flex shrink-0 items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 pl-2.5 pr-1.5 py-1 text-xs font-semibold text-primary mb-1">
+          <div className="flex shrink-0 items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 pl-2.5 pr-1.5 py-1 text-xs font-semibold text-primary mb-2 self-start">
             <ActiveIcon className="size-3.5" />
             <span className="font-mono">{activeMode.command}</span>
             <button
@@ -348,6 +348,7 @@ export function PromptComposer({
           </div>
         ) : null}
 
+        {/* Full-width Textarea */}
         <textarea
           ref={textareaRef}
           value={value}
@@ -360,23 +361,42 @@ export function PromptComposer({
           }
           rows={1}
           disabled={isGenerating}
-          className="min-w-0 max-h-56 flex-1 resize-none bg-transparent text-[0.95rem] leading-6 text-foreground outline-none placeholder:text-muted-foreground/80 pb-1.5 disabled:opacity-60"
+          className="min-w-0 w-full max-h-56 resize-none bg-transparent px-1 text-[0.95rem] leading-6 text-foreground outline-none placeholder:text-muted-foreground/80 pb-2 disabled:opacity-60"
         />
 
-        <VoicePill />
+        {/* Bottom Action Strip (ChatGPT style) */}
+        <div className="flex items-center justify-between pt-1">
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => {
+                setIsMenuOpen((prev) => !prev);
+                textareaRef.current?.focus();
+              }}
+              className="flex size-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground cursor-pointer text-xs font-mono font-bold"
+              aria-label="Toggle slash shortcuts"
+              title="Note Formats (/)"
+            >
+              /
+            </button>
+          </div>
 
-        <button
-          type="submit"
-          disabled={!value.trim() || isGenerating}
-          aria-label="Send"
-          className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-opacity disabled:opacity-40 cursor-pointer"
-        >
-          {isGenerating ? (
-            <Loader2 className="size-4 animate-spin" aria-hidden />
-          ) : (
-            <ArrowUp className="size-4" aria-hidden />
-          )}
-        </button>
+          <div className="flex items-center gap-2">
+            <VoicePill />
+            <button
+              type="submit"
+              disabled={!value.trim() || isGenerating}
+              aria-label="Send"
+              className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-opacity disabled:opacity-40 cursor-pointer shadow-xs"
+            >
+              {isGenerating ? (
+                <Loader2 className="size-4 animate-spin" aria-hidden />
+              ) : (
+                <ArrowUp className="size-4" aria-hidden />
+              )}
+            </button>
+          </div>
+        </div>
       </form>
     </div>
   );
